@@ -1,5 +1,15 @@
-@import "normalize.min.css";
-@import "grids.min.css";
+/*
+Theme Name: Post-digital reader
+Theme URI: http://github.com/murej/post-digital-reader
+Description: 
+Version: 0.1
+Author: Jure Martinec
+Author URI: http://www.juremartinec.net/
+Tags: 
+*/
+
+@import "css/normalize.min.css";
+@import "css/grids.min.css";
 
 $primary-font-stack: Helvetica, Arial, sans-serif;
 $secondary-font-stack: Georgia, serif;
@@ -294,8 +304,7 @@ ul#publish {
 body.publish-mode {
 	
 	ul#nav li:not(#collector) {
-		position: relative;
-		z-index: 0;
+		display: none;
 	}
 	
 	li#collector {
@@ -312,6 +321,7 @@ body.publish-mode {
 	}
 	div#dimmer {
 		display: block;
+		cursor: pointer;
 	}
 	
 }
@@ -406,7 +416,6 @@ ul#wrapper {
 			display: none;
 			
 			li:first-child {
-/* 				display: none; */
 				cursor: move;
 				
 				a {
