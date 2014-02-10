@@ -1,4 +1,5 @@
 <?php get_header(); ?>
+<?php $chapter = single_cat_title('', false); ?>
         
         <ul id="nav" class="pure-g">
         
@@ -6,7 +7,7 @@
 			<li class="pure-u-1-6 viewing system">edition:</li>
 			<li class="pure-u-1-2">
 			
-				<h3>Hitchcock's worst nightmare</h3>
+				<h3>Original</h3>
 				
 				<ul id="edition-options" class="system">
 					<li><a href="">change</a></li>
@@ -19,7 +20,7 @@
 			<li class="pure-u-1-6"></li>
 			<li class="pure-u-1-12">
 				<h3 id="toc">
-					<a href="index.php">
+					<a href="<?php bloginfo('url'); ?>">
 						<span class="system">&equiv; </span>TOC
 					</a>
 				</h3>
@@ -53,7 +54,7 @@
         		<div class="pure-u-1-4"></div>
         		<div class="pure-u-1-2 title">
         			<h2>Design for</h2>
-        			<h1><?php single_cat_title(); ?></h1>
+        			<h1><?php echo $chapter; ?></h1>
         		</div>
 
         	</li>
@@ -68,8 +69,15 @@
         	<li id="content">
         	
         		<ul class="wrapper">
+<?php 
 
-<?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
+// query chapter (category) and filter paragraphs by edition (tag)
+$the_query = new WP_Query('category__in=' . get_cat_ID( $chapter ) . '&tag=' . $_GET["edition"]);
+
+// THE LOOP
+if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_query->the_post();
+
+?>
         	
 				<li id="paragraph-1" class="pure-g paragraph">
 	        		
@@ -102,9 +110,11 @@
 	        		</div>
 	
 	        	</li>
+
+<?php wp_reset_postdata(); ?>
 	        	
 <?php endwhile; else: ?>
-<p><?php _e('Sorry, no posts matched your criteria.'); ?></p>
+<p><?php _e('Sorry, not much to see here.'); ?></p>
 <?php endif; ?>
 
         		</ul>

@@ -43,25 +43,25 @@
         
         <ul id="wrapper">
         
-        	<li class="pure-g introduction">
+			<li class="pure-g introduction">
         
-        		<div class="pure-u-1-4"></div>
+				<div class="pure-u-1-4"></div>
 				<div class="pure-u-5-12">
 					<h2>Hello, you.</h2>
 					<p class="hyphenate">This is a theoretical exploration of how digital is affecting the reader of books. The writing process formed linear text and resulted in a set of possible design principles for the future (digital) book. This online version flips the traditional form and generates structure in relation to those principles in hope of creating new meaning, alternate interpretations and subsequently new ways of thinking about the role of the future book. Consider this not as a finished frame of work, not as a set of rules nor methods of creation for the ideal book of the future. It’s a starting point for a conversation, with gaps, mistakes and provocations, ready to be dissected, interpreted, filled in and corrected by the reading audience.<p>
 					<p>&ndash; <a href="#author" class="author">Jure Martinec</a></p>
 				</div>
-
-        	</li>
+				
+			</li>
 
 <?php
 	$chapters = get_categories(); 
 	
 	foreach($chapters as $counter=>$chapter) {
 ?>
-        	<li id="ch<?php echo $counter+1; ?>" class="pure-g chapter">
+        	<li id="ch-<?php echo $chapter->cat_ID; ?>" class="pure-g chapter">
 				
-				<a href="<?php echo get_category_link($chapter->cat_ID); ?>"> 
+				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapter->cat_ID)); ?>"> 
 				
 	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.gif"></div>
 	        		<div class="pure-u-1-4"></div>
