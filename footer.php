@@ -10,7 +10,7 @@
         	</li>
         	<li class="pure-u-1-12"></li>
         	<li class="pure-u-1-6">
-        		<h3><br><br>Illustrations by <a href="http://ilustratorcek.tumblr.com/" target="_blank">Matija Medved</a>.<br><br>
+        		<h3>Illustrations by <a href="http://ilustratorcek.tumblr.com/" target="_blank">Matija Medved</a>.<br><br>
 				Licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.<br><br>
 				Powered by <a href="http://www.wordpress.org/">Wordpress</a>.</h3>
 			</li>

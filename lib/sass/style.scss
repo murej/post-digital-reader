@@ -134,7 +134,7 @@ ul#nav {
 	height: 4.5em;
 	
 	background-color: rgba(255,255,255,0.95);
-			
+	
 	h3 {
 		float: left;
 		margin: 0 0.5em 0 0;
@@ -152,6 +152,10 @@ ul#nav {
 			text-decoration: none;
 		}
 	}
+
+	li.no-edition h3 {
+		opacity: 0.25;
+	}
 	
 	ul#edition-options {
 		padding: 0;
@@ -168,7 +172,7 @@ ul#nav {
 	}
 
 	li#collector {
-		height: 100%;
+		height: 4.5em;
 		
 		div {
 						
@@ -224,6 +228,15 @@ ul#nav.start {
 	height: 100% !important;
 	background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.25), transparent) !important;
 }
+
+ul#nav.home {
+	
+	li#collector { visibility: hidden; }
+	
+	h3#toc { display: none; }
+}
+			
+
 
 ul#publish {
 
@@ -367,11 +380,9 @@ ul#wrapper {
 		}
 		div.img {
 			width: 100%;
-			cursor: pointer;
 		}
 		div.title {
 			margin-top: -4.5em;
-			cursor: pointer;
 		}
 		
 		div.separator {
@@ -508,8 +519,7 @@ ul#wrapper {
 		}
 	}
 	
-	li#subscribe {
-		margin: 0 0 12em 0;
+	li.action {
 
 		h2 {
 			margin-bottom: 2em;
@@ -523,7 +533,7 @@ ul#wrapper {
 			padding-right: 0;
 		}
 		p {
-			margin: 0;
+			margin: 0 0 12em 0;
 		}
 	}
 	
@@ -620,8 +630,13 @@ button {
 	padding: 0 2em;
 	outline: none;
 }
-button:hover {
+button:hover:not(:disabled) {
 	background-color: rgba($primary-color,0.95);
+}
+
+button:disabled {
+	background-color: rgba($primary-color, 0.25);
+	color: rgba($secondary-color, 0.75);
 }
 
 input {

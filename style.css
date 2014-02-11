@@ -38,10 +38,11 @@ ul#nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; padding: 0; m
 ul#nav h3 { float: left; margin: 0 0.5em 0 0; line-height: 4.5; }
 ul#nav h3 span { font-size: 1.5em; position: relative; top: 0.042em; line-height: 1; }
 ul#nav h3 a { display: block; height: 100%; text-decoration: none; }
+ul#nav li.no-edition h3 { opacity: 0.25; }
 ul#nav ul#edition-options { padding: 0; margin: 0; }
 ul#nav ul#edition-options li { float: left; padding-left: 0.5em; line-height: 5.17; }
 ul#nav ul#edition-options li:first-child { padding-left: 1.5em; }
-ul#nav li#collector { height: 100%; }
+ul#nav li#collector { height: 4.5em; }
 ul#nav li#collector div { line-height: 2; margin: 0 0.67em 0 0.33em; height: 100%; font-size: 2.25em; font-weight: 700; background-color: #323232; color: white; text-align: center; transition: padding 0.1s; }
 ul#nav li#collector span { display: block; height: 0; width: 0; border-bottom: 1em solid transparent; border-left: 3em solid #323232; border-right: 3em solid #323232; margin: 0 1.5em 0 0.75em; }
 ul#nav li#collector:hover { cursor: pointer; }
@@ -50,6 +51,9 @@ ul#nav li#collector:hover span { border-left-color: rgba(50, 50, 50, 0.95); bord
 ul#nav li.viewing { text-align: right; line-height: 5.1429; padding-right: 1.5em; margin-left: -1.5em; }
 
 ul#nav.start { position: relative !important; height: 100% !important; background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25), transparent) !important; }
+
+ul#nav.home li#collector { visibility: hidden; }
+ul#nav.home h3#toc { display: none; }
 
 ul#publish { background-color: #323232 !important; margin-top: 4.5em; color: white; position: relative; z-index: 100; max-height: 0; overflow: hidden; transition: max-height 0.25s, padding 0.5s; }
 ul#publish button { width: 100%; background-color: white; color: #000000; margin-top: 3.4286em; padding: 0; }
@@ -78,8 +82,8 @@ ul#wrapper li#loc div { position: absolute; right: 0; padding-top: 1.71em; paddi
 ul#wrapper li#loc div.stuck { position: fixed; bottom: 0; }
 ul#wrapper li.chapter { padding: 0 0 1.5em 0; }
 ul#wrapper li.chapter div.img img { width: 100%; height: auto; margin: 0; padding: 0; }
-ul#wrapper li.chapter div.img { width: 100%; cursor: pointer; }
-ul#wrapper li.chapter div.title { margin-top: -4.5em; cursor: pointer; }
+ul#wrapper li.chapter div.img { width: 100%; }
+ul#wrapper li.chapter div.title { margin-top: -4.5em; }
 ul#wrapper li.chapter div.separator { margin: 2.25em 0 12em 0; }
 ul#wrapper li.paragraph { margin: 1.5em 0; }
 ul#wrapper li.paragraph p { margin: 0; box-sizing: border-box; padding: 0 1.5em 0 0; background-color: white; }
@@ -100,10 +104,9 @@ ul#wrapper li.add-content ul#adding-options { margin-bottom: 13.71em; }
 ul#wrapper li.add-content div#writer { display: none; position: relative; z-index: 100; overflow: scroll; }
 ul#wrapper li.add-content div#writer form textarea { width: 100%; min-height: 1em; padding: 0; appearance: none; border: 0; outline: none; line-height: 1.5; resize: none; }
 ul#wrapper li.add-content div#writer form div.buttons { position: fixed; bottom: 4em; }
-ul#wrapper li#subscribe { margin: 0 0 12em 0; }
-ul#wrapper li#subscribe h2 { margin-bottom: 2em; }
-ul#wrapper li#subscribe button { display: block; width: 100%; height: 5.1429em; margin-bottom: 1.72em; padding-left: 0; padding-right: 0; }
-ul#wrapper li#subscribe p { margin: 0; }
+ul#wrapper li.action h2 { margin-bottom: 2em; }
+ul#wrapper li.action button { display: block; width: 100%; height: 5.1429em; margin-bottom: 1.72em; padding-left: 0; padding-right: 0; }
+ul#wrapper li.action p { margin: 0 0 12em 0; }
 ul#wrapper li.next-chapter h2:last-child { margin: 2em 0; }
 
 ul#footer { width: 100%; background-color: #323232; color: rgba(255, 255, 255, 0.75); padding: 4.5em 0; }
@@ -128,7 +131,9 @@ div#dimmer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; display: non
 
 button { appearance: none; border: 0; background-color: #323232; color: white; height: 3.429em; padding: 0 2em; outline: none; }
 
-button:hover { background-color: rgba(50, 50, 50, 0.95); }
+button:hover:not(:disabled) { background-color: rgba(50, 50, 50, 0.95); }
+
+button:disabled { background-color: rgba(50, 50, 50, 0.25); color: rgba(255, 255, 255, 0.75); }
 
 input { font-size: 1.5em; line-height: 1; padding: 0.37em 0 0.33em 0.35em; margin: 0; appearance: none; font-family: Georgia, serif; border: 0.084em solid #323232; outline: none; }
 
