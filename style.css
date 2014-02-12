@@ -30,8 +30,8 @@ a { color: #000000; }
 a:hover { opacity: 1 !important; }
 
 div#cover { position: relative; z-index: 9999; background-color: #323232; height: 100%; }
-div#cover h1 { font-family: Helvetica, Arial, sans-serif; color: white; margin: 0; font-weight: 700; position: absolute; top: 50%; margin-top: -2.8125em; }
-div#cover div.arrow { width: 1em; height: 1em; border-width: 0 0.5em 0.5em 0; border-color: white; border-style: solid; transform: rotate(45deg); position: absolute; top: 50%; margin-top: -0.75em; }
+div#cover h1 { font-family: Helvetica, Arial, sans-serif; color: white; margin: 0; font-weight: 700; position: absolute; top: 50%; margin-top: -2.8125em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); }
+div#cover div.arrow { width: 1em; height: 1em; border-width: 0 0.5em 0.5em 0; border-color: white; border-style: solid; transform: rotate(45deg); position: absolute; top: 50%; margin-top: -0.75em; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); }
 div#cover .facebook { position: absolute; top: 50%; /* 		bottom: 4em; */ margin-top: 13.7em; }
 
 ul#nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; padding: 0; margin: 0; height: 4.5em; background-color: rgba(255, 255, 255, 0.95); }
@@ -42,13 +42,14 @@ ul#nav li.no-edition h3 { opacity: 0.25; }
 ul#nav ul#edition-options { padding: 0; margin: 0; }
 ul#nav ul#edition-options li { float: left; padding-left: 0.5em; line-height: 5.17; }
 ul#nav ul#edition-options li:first-child { padding-left: 1.5em; }
-ul#nav li#collector { height: 4.5em; }
-ul#nav li#collector div { line-height: 2; margin: 0 0.67em 0 0.33em; height: 100%; font-size: 2.25em; font-weight: 700; background-color: #323232; color: white; text-align: center; transition: padding 0.1s; }
-ul#nav li#collector span { display: block; height: 0; width: 0; border-bottom: 1em solid transparent; border-left: 3em solid #323232; border-right: 3em solid #323232; margin: 0 1.5em 0 0.75em; }
+ul#nav li.viewing { text-align: right; line-height: 5.1429; padding-right: 1.5em; margin-left: -1.5em; }
 ul#nav li#collector:hover { cursor: pointer; }
 ul#nav li#collector:hover div { padding-top: 0.15em; background-color: rgba(50, 50, 50, 0.95); }
 ul#nav li#collector:hover span { border-left-color: rgba(50, 50, 50, 0.95); border-right-color: rgba(50, 50, 50, 0.95); }
-ul#nav li.viewing { text-align: right; line-height: 5.1429; padding-right: 1.5em; margin-left: -1.5em; }
+
+#collector { height: 4.5em; }
+#collector div { line-height: 2; margin: 0 0.67em 0 0.33em; height: 100%; font-size: 2.25em; font-weight: 700; background-color: #323232; color: white; text-align: center; transition: padding 0.1s; }
+#collector span { display: block; height: 0; width: 0; border-bottom: 1em solid transparent; border-left: 3em solid #323232; border-right: 3em solid #323232; margin: 0 1.5em 0 0.75em; }
 
 ul#nav.start { position: relative !important; height: 100% !important; background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25), transparent) !important; }
 
@@ -66,7 +67,7 @@ ul#publish input.title::-webkit-input-placeholder { /* WebKit browsers */ color:
 ul#publish input.title:-moz-placeholder { /* Mozilla Firefox 4 to 18 */ color: rgba(255, 255, 255, 0.25); }
 ul#publish input.title::-moz-placeholder { /* Mozilla Firefox 19+ */ color: rgba(255, 255, 255, 0.25); }
 ul#publish input.title:-ms-input-placeholder { /* Internet Explorer 10+ */ color: rgba(255, 255, 255, 0.25); }
-ul#publish button.clear { background-color: #a21b00; color: white; }
+ul#publish button[name=clear] { background-color: #a21b00; color: white; }
 
 body.publish-mode ul#nav li:not(#collector) { display: none; }
 body.publish-mode li#collector { position: relative; z-index: 100; }
@@ -107,7 +108,16 @@ ul#wrapper li.add-content div#writer form div.buttons { position: fixed; bottom:
 ul#wrapper li.action h2 { margin-bottom: 2em; }
 ul#wrapper li.action button { display: block; width: 100%; height: 5.1429em; margin-bottom: 1.72em; padding-left: 0; padding-right: 0; }
 ul#wrapper li.action p { margin: 0 0 12em 0; }
+ul#wrapper li#publish { margin: 11em 0 12em 0; }
+ul#wrapper li#publish div#collector div { margin: 0 1em 0 0; }
+ul#wrapper li#publish div#collector span { margin: 0; }
+ul#wrapper li#publish h2 { margin-top: 0.9em; }
+ul#wrapper li#publish p { margin: 0.33em 0 6.86em 0; }
+ul#wrapper li#publish div.padded { box-sizing: border-box; padding-right: 1.5em; }
+ul#wrapper li#publish button { margin: 0; }
 ul#wrapper li.next-chapter h2:last-child { margin: 2em 0; }
+ul#wrapper li.next-chapter a { text-decoration: none; }
+ul#wrapper li.next-chapter h2 a { text-decoration: underline; }
 
 ul#footer { width: 100%; background-color: #323232; color: rgba(255, 255, 255, 0.75); padding: 4.5em 0; }
 ul#footer a { color: rgba(255, 255, 255, 0.75); }
@@ -145,7 +155,6 @@ input { font-size: 1.5em; line-height: 1; padding: 0.37em 0 0.33em 0.35em; margi
 
 :-ms-input-placeholder { /* Internet Explorer 10+ */ color: rgba(0, 0, 0, 0.25); }
 
-@media only screen and (max-width: 767px) { body { width: 767px; } }
 /* TABLET PORTRAIT */
-@media only screen and (max-width: 1024px) { body { font-size: 0.75em; } }
+@media only screen and (max-width: 1024px) { body { font-size: 0.75em; width: 1024px; } }
 /* LARGE DESKTOP */

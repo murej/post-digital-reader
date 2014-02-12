@@ -1,9 +1,11 @@
 <?php 
 
 	global $edition;
+	global $chapters;
 	global $chapterTitle;
 	
 	$edition = get_term_by('slug', $_GET["edition"], 'post_tag');
+	$chapters = get_categories(); 
 	$chapterTitle = single_cat_title('', false);
 
 	// show original edition if there is no edition set and it was not explicitly cleared
@@ -21,7 +23,7 @@
     <head>
         <meta charset="<?php bloginfo( 'charset' ); ?>">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title><?php wp_title(); ?></title>
+        <title><?php if(isset($chapterTitle)) { echo "Design for " . $chapterTitle . " &infin; "; } ?>Post-Digital Reader</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
@@ -54,14 +56,14 @@
 						<span class="serif">P05T-D16174L</span><br>
 						READER.<br>
 						The <i class="strikethrough serif">form</i> role<br>
-						of the book<br>
-						<i class="strikethrough serif">in</i> with digital media<br>
+						of books in the<br>
+						digital <i class="strikethrough serif">media</i> age<br>
 					</h1>
 					
 					<iframe class="facebook" src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.postdigitalreader.com%2F&amp;width&amp;layout=button_count&amp;action=recommend&amp;show_faces=true&amp;share=false&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:21px;" allowTransparency="true"></iframe>
 					
 				</div>
-        	
+				        	
         	</div>
         	
         </div>

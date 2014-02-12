@@ -190,9 +190,9 @@ https://github.com/imakewebthings/jquery-waypoints/blob/master/licenses.txt
 //@codekit-prepend "jquery.autosize.min.js"
 
 function resizeRibbon() {
-	var ribbonWidth = $("li#collector div").width();
-	$("li#collector span").css("border-left-width",(ribbonWidth/16/2)+"em");
-	$("li#collector span").css("border-right-width",(ribbonWidth/16/2)+"em");
+	var ribbonWidth = $("#collector div").width();
+	$("#collector span").css("border-left-width",(ribbonWidth/16/2)+"em");
+	$("#collector span").css("border-right-width",(ribbonWidth/16/2)+"em");
 }
 
 function setParagraphNum(currParagraphNum, allParagraphNum) {
@@ -268,7 +268,7 @@ function publishMode(setting) {
 }
 
 function setCollectorNum(num) {
-	$("ul#nav li#collector div").html(num);
+	$("#collector div").html(num);
 }
 
 function highlightCollectedPars(collection) {
@@ -288,7 +288,7 @@ function collectParagraphs(id) {
 	// if already saved
 	if( $.cookie('myCollection') !== undefined ) {
 		// get what was saved
-		collection = $.parseJSON( $.cookie('myCollection') );
+		collection = $.parseJSON( decodeURI( $.cookie('myCollection') ) );
 	}
 	
 	// if paragraph id was given
@@ -321,7 +321,7 @@ function collectParagraphs(id) {
 	if( collection.length > 0 ) {
 	
 		// turn array into a string
-		collection = JSON.stringify(collection);
+		collection = encodeURI( JSON.stringify(collection) );
 		
 		// save collection to cookie
 		$.cookie('myCollection', collection, {
@@ -391,6 +391,12 @@ $(document).ready(function() {
 		
 		collectParagraphs( $(this).parent().parent().attr('id').replace( /^\D+/g, '') );
 		
+	});
+	
+	$("ul#publish button[name=clear]").click(function() {
+		//if($.cookie('myCollection') !== undefined) {
+			$.removeCookie('myCollection', { path: "/" });
+		//}
 	});
 
 	// SORTING PARAGRAPHS

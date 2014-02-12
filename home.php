@@ -13,10 +13,8 @@
 				
 			</li>
 
-<?php
-	$chapters = get_categories(); 
-	
-	foreach($chapters as $counter=>$chapter) {
+<?php	
+	foreach($chapters as $chapter) {
 ?>
         	<li id="ch-<?php echo $chapter->cat_ID; ?>" class="pure-g chapter">
 				
@@ -56,25 +54,31 @@
 	        		<form action="#RSS-link"><button type="submit" class="system light">Get RSS feed</button></form>
 	        			
 				</div>
+				
+	        	<div class="pure-u-1-4"></div>
+	        	<div class="pure-u-1-4"></div>
+	        	<div class="pure-u-1-2 separator"></div>
         	
         	</li>
 
 			<li id="publish" class="pure-g action">
 			
         		<div class="pure-u-1-4"></div>
-				<div class="pure-u-1-2">        		
+				<div id="collector" class="pure-u-1-12"><div>0</div><span></span></div>
+				<div class="pure-u-1-6">        		
 	        		<h2>It's your book.</h2>
 				</div>
-        		<div class="pure-u-1-4"></div>
-        		<div class="pure-u-1-4"></div>
-        		<p class="pure-u-1-6 hyphenate">Throughout chapters you have the option to collect each paragraph in any of the editions, add some of your own and finally publish the whole package as a unique edition.</p>
-				<div class="pure-u-1-12"></div>
-				<div class="pure-u-1-4">
+        		<p class="pure-u-1-4 hyphenate">Throughout chapters you have the option to collect each paragraph in any of the editions, add some of your own and finally publish the whole package as a unique edition.</p>
+				<div class="pure-u-1-4"></div>
+				<div class="pure-u-1-4"></div>
+				<div class="pure-u-1-4 padded">
 	        		
-<!-- 	        		<form action=""><button type="submit" class="system light">Start collecting</button></form> -->
+	        		<form action=""><button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>View collected</button></form>
+				</div>
+				
+				<div class="pure-u-1-4">
 
-	        		<form action=""><button type="submit" class="system light disabled"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>(<?php if(isset($_COOKIE['myCollection'])) { /*echo count( json_decode($_COOKIE['myCollection'], true) );*/ } else { echo 0; }?>) Publish as a new edition</button></form>
-
+	        		<form action=""><button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>Publish as a new edition</button></form>
 
 				</div>
 	        		

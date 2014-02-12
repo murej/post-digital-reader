@@ -97,6 +97,8 @@ div#cover {
 		position: absolute;
 		top: 50%;
 		margin-top: -2.8125em;
+		
+		text-shadow: 2px 2px 4px rgba(0,0,0,0.25);
 	}
 	
 	div.arrow {
@@ -110,6 +112,9 @@ div#cover {
 		position: absolute;
 		top: 50%;
 		margin-top: -0.75em;
+
+		box-shadow: 2px 2px 4px rgba(0,0,0,0.25);
+
 	}
 	.facebook {
 		position: absolute;
@@ -170,37 +175,14 @@ ul#nav {
 			padding-left: 1.5em;
 		}
 	}
-
-	li#collector {
-		height: 4.5em;
 		
-		div {
-						
-			line-height: 2;
-			margin: 0 0.67em 0 0.33em;
-			height: 100%;
-			
-			font-size: 2.25em;
-			font-weight: 700;
-			background-color: $primary-color;
-			color: $secondary-color;
-			text-align: center;
-			
-			transition: padding 0.1s;
-		}
-		
-		span {
-			display: block;
-			height: 0;
-			width: 0;
-			
-			border-bottom: 1em solid transparent;
-			border-left: 3em solid $primary-color;
-			border-right: 3em solid $primary-color;
-			margin: 0 1.5em 0 0.75em;
-		}
+	li.viewing {
+		text-align: right;
+		line-height: 5.1429;
+		padding-right: 1.5em;
+		margin-left: -1.5em;
 	}
-
+	
 	li#collector:hover {
 		cursor: pointer;
 	
@@ -213,15 +195,39 @@ ul#nav {
 			border-right-color: rgba($primary-color,0.95);
 		}
 	}
-		
-	li.viewing {
-		text-align: right;
-		line-height: 5.1429;
-		padding-right: 1.5em;
-		margin-left: -1.5em;
-	}
 	
 }
+
+#collector {
+	height: 4.5em;
+	
+	div {
+					
+		line-height: 2;
+		margin: 0 0.67em 0 0.33em;
+		height: 100%;
+		
+		font-size: 2.25em;
+		font-weight: 700;
+		background-color: $primary-color;
+		color: $secondary-color;
+		text-align: center;
+		
+		transition: padding 0.1s;
+	}
+	
+	span {
+		display: block;
+		height: 0;
+		width: 0;
+		
+		border-bottom: 1em solid transparent;
+		border-left: 3em solid $primary-color;
+		border-right: 3em solid $primary-color;
+		margin: 0 1.5em 0 0.75em;
+	}
+}
+
 
 ul#nav.start {
 	position: relative !important;
@@ -308,7 +314,7 @@ ul#publish {
 	    color: rgba($secondary-color,0.25);
 	}
 	
-	button.clear {
+	button[name=clear] {
 		background-color: $alert-color;
 		color: $secondary-color;
 	}
@@ -537,10 +543,44 @@ ul#wrapper {
 		}
 	}
 	
+	li#publish {
+	
+		margin: 11em 0 12em 0;
+		
+		div#collector {
+			
+			div { margin: 0 1em 0 0; }
+			span { margin: 0; }
+		}
+		
+		h2 {
+			margin-top: 0.9em;
+		}
+		
+		p {
+			margin: 0.33em 0 6.86em 0;
+		}
+		
+		div.padded {
+			box-sizing: border-box;
+			padding-right: 1.5em;
+		}
+		
+		button { margin: 0; }
+	}
+	
 	li.next-chapter {
 				
 		h2:last-child {
 			margin: 2em 0;
+		}
+		
+		a {
+			text-decoration: none;
+		}
+		
+		h2 a {
+			text-decoration: underline;
 		}
 	}
 }
@@ -664,12 +704,12 @@ input {
 }
 
 @media only screen and (max-width : 767px) {
-	body { width: 767px; }
+	body {  }
 }
 
 /* TABLET PORTRAIT */
 @media only screen and (max-width : 1024px) {
-	body { font-size: 0.75em; }
+	body { font-size: 0.75em; width: 1024px; }
 }
 
 /* LARGE DESKTOP */

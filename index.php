@@ -1,22 +1,34 @@
 <?php get_header(); ?>
 <?php
 
+	$currentChapterID = get_cat_ID( $chapterTitle );
+	$currentChapterKey;
 
 	// query chapter (category) and filter paragraphs by edition (tag)
-	$queryString = 'category__in=' . get_cat_ID( $chapterTitle );
+	$queryString = 'category__in=' . $currentChapterID;
 	if($edition) { $queryString = $queryString . '&tag_id=' . $edition->term_id; }
 	$the_query = new WP_Query($queryString);
-
+	
+	foreach($chapters as $key => $chapter) {
+		
+		if( $currentChapterID == $chapter->cat_ID ) {
+			$currentChapterKey = $key;
+		}
+	}
 	
 ?>
 
         <ul id="publish" class="pure-g">
 	        <li class="pure-u-1-4"></li>
 	        <li class="pure-u-1-4">		        
-		        <form>
-		        	<input class="title" type="text" placeholder="Click to name your edition" required>
-		        	<input type="text" placeholder="Enter your name (optional)">
-		        	<input type="email" placeholder="Enter your contact e-mail (optional)">
+        		<form method="post" action="<?php bloginfo('template_url'); ?>/publish.php">
+        			
+					<input type="hidden" value="<?php echo str_replace('/wp-content/themes', '', get_theme_root()); ?>/wp-blog-header.php" name="rootpath">
+					<?php wp_nonce_field(); ?>
+					
+		        	<input class="title" type="text" placeholder="Click to name your edition" required name="editionTitle">
+		        	<input type="text" placeholder="Enter your name (optional)" name="name">
+		        	<input type="email" placeholder="Enter your contact e-mail (optional)" name="email">
 					<button type="submit" class="system">Publish as a new edition</button>
 		        </form>
 	        </li>
@@ -24,7 +36,7 @@
 	        <li class="pure-u-1-6">
 				<button type="submit" class="system" name="view">View</button>
 				<button type="submit" class="system" name="download">Download</button>
-				<button type="submit" class="system clear">Clear my collection</button>
+				<form action=""><button type="submit" class="system" name="clear">Clear my collection</button></form>
 	        </li>
         </ul>
 
@@ -63,7 +75,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 	        		<div class="pure-u-1-12 paragraph-num system"><a href="">#<?php the_ID(); ?></a></div>
 	        		<div class="pure-u-1-6"></div>
 	        		
-	        		<p class="pure-u-5-12 hyphenate"><?php echo str_replace("</p>", "", str_replace("<p>", "", get_the_content('')) ); ?></p>
+	        		<p class="pure-u-5-12 hyphenate"><?php echo str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ); ?></p>
 	
 	        		<div class="pure-u-1-4 collection-count system">(113x)</div>
 
@@ -71,7 +83,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        		<li><span>&equiv; </span><a href="">MOVE</a></li>
 		        		<li><span>&infin; </span><a href="">SHARE</a></li>
 	        		</ul>
-	        		
+
 	        		<div class="link">
 	        		
 	        			<div class="pure-u-1-6"></div>
@@ -121,9 +133,13 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        
 	        		<div class="pure-u-1-4"></div>
 	        		
-	        		<form class="pure-u-5-12">
-	        				        			
-	        			<textarea placeholder="Start typing here..."></textarea>
+	        		<form method="post" class="pure-u-5-12" action="<?php bloginfo('template_url'); ?>/contribute.php">
+	        			
+						<input type="hidden" value="<?php echo $currentChapterID; ?>" name="chapter">
+						<input type="hidden" value="<?php echo str_replace('/wp-content/themes', '', get_theme_root()); ?>/wp-blog-header.php" name="rootpath">
+						<?php wp_nonce_field(); ?>
+	        			
+	        			<textarea name="paragraph" placeholder="Start typing here..."></textarea>
 	        			<div class="buttons">
 	        				<button type="submit" class="system">Add paragraph</button><span class="system"> or <a href="#" class="cancel">cancel</a></span>
 	        			</div>
@@ -133,18 +149,26 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        </div>
         	
         	</li>
+        	
+<?php if( $currentChapterKey+1 <= count($chapters)-1  ) { ?>
 
-        	<li id="ch2" class="pure-g chapter next-chapter">
-        
-        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.gif"></div>
-        		<div class="pure-u-1-4"></div>
-        		<div class="pure-u-1-2 title">
-        			<h2>Design for</h2>
-        			<h1>Language in/as<br>any form</h1>
-        			<h2><a href="">Read next</a> &rarr;</h2>
-        		</div>
+        	<li id="ch-<?php echo $chapters[$currentChapterKey+1]->cat_ID; ?>" class="pure-g chapter next-chapter">
+				
+				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$currentChapterKey+1]->cat_ID)); ?>"> 
+				
+	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.gif" alt="Illustration"></div>
+	        		<div class="pure-u-1-4"></div>
+	        		<div class="pure-u-1-2 title">
+	        			<h2>Design for</h2>
+	        			<h1><?php echo $chapters[$currentChapterKey+1]->name; ?></h1>
+	        			<h2><a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$currentChapterKey+1]->cat_ID)); ?>">Read next</a> &rarr;</h2>
+	        		</div>
+        		
+				</a>
 
         	</li>
+
+<?php } ?>
 
         </ul> 
         
