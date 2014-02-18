@@ -5,9 +5,12 @@
 	$currentChapterKey;
 
 	// query chapter (category) and filter paragraphs by edition (tag)
-	$queryString = 'category__in=' . $currentChapterID;
-	if($edition) { $queryString = $queryString . '&tag_id=' . $edition->term_id; }
-	$the_query = new WP_Query($queryString);
+	$queryParams = array( 'category__in' => array( $currentChapterID ) );
+	
+	if($edition === "-1") { $queryParams['post__in'] = $paragraphIDs; }
+	else if($edition) { $queryParams['tag_id'] = $edition->term_id; }
+		
+	$the_query = new WP_Query($queryParams);
 	
 	foreach($chapters as $key => $chapter) {
 		
@@ -34,9 +37,15 @@
 	        </li>
 	        <li class="pure-u-1-12"></li>
 	        <li class="pure-u-1-6">
-				<button type="submit" class="system" name="view">View</button>
-				<button type="submit" class="system" name="download">Download</button>
-				<form action=""><button type="submit" class="system" name="clear">Clear my collection</button></form>
+				<form method="get" action="<?php bloginfo('url'); ?>">
+					<input type="hidden" name="edition" value="-1">
+					<button type="submit" class="view system">View</button>
+				</form>
+				<button type="submit" class="download system">Download</button>
+				<form action="<?php echo "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
+					<input type="hidden" name="edition" value="<?php echo $_REQUEST['edition']; ?>">
+					<button type="submit" class="system clear">Clear my collection</button>
+				</form>
 	        </li>
         </ul>
 

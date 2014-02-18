@@ -338,6 +338,30 @@ function collectParagraphs(id) {
 	
 }
 
+/*
+function changeHash(hash) {
+
+	hash = hash.replace( /^#/, '' );
+	var fx, node = $( '#' + hash );
+	if ( node.length ) {
+		node.attr( 'id', '' );
+		fx = $( '<div></div>' )
+				.css({
+					position:'absolute',
+					visibility:'hidden',
+					top: $(document).scrollTop() + 'px'
+				})
+				.attr( 'id', hash )
+				.appendTo( document.body );
+	}
+	document.location.hash = hash;
+	if ( node.length ) {
+		fx.remove();
+		node.attr( 'id', hash );
+	}
+}
+*/
+
 $(document).ready(function() {
 
 	var allParagraphNum;
@@ -346,6 +370,7 @@ $(document).ready(function() {
 	/* INITIALISE */
 	resizeRibbon();
 	collectParagraphs();
+	$("div#edition-selector").tabs();
 	allParagraphNum = $("ul#wrapper li p").length;
 	setParagraphNum(0, allParagraphNum);
     $( "li#content ul.wrapper" ).sortable({ axis: "y", disabled: true });
@@ -379,9 +404,33 @@ $(document).ready(function() {
 	});
 	
 	
-	// EDITION NAV
+	// EDITION OPTIONS
 	$("a.clear-edition").click(function() {
-		$.cookie('clearedEditions', true, { expires: 7, path: "/" });
+		$.cookie('clearedEditions', true, { expires: 3, path: "/" });
+	});
+	
+	// EDITION SELECTION
+	$("ul#nav a[href=#change]").click(function(e) {
+	
+		e.preventDefault();
+		
+		//alert("change");
+		
+		if( $("body.edition-select-mode").length !== 0 ) {
+			$("body").removeClass("edition-select-mode locked");
+		} else {
+			$("body").addClass("edition-select-mode locked");
+		}
+	});
+
+	$("div#edition-selector ul#tabs li a").click(function() {
+		$(this).parent().parent().children("li").children("a").removeClass("selected");
+		$(this).addClass("selected");
+		$(this).blur();
+	});
+	
+	$("h3#close span").click(function() {
+		$("body").removeClass("edition-select-mode locked");
 	});
 
 	// COLLECTING PARAGRAPHS
@@ -393,7 +442,7 @@ $(document).ready(function() {
 		
 	});
 	
-	$("ul#publish button[name=clear]").click(function() {
+	$("ul#publish button.clear").click(function() {
 		//if($.cookie('myCollection') !== undefined) {
 			$.removeCookie('myCollection', { path: "/" });
 		//}
@@ -419,6 +468,8 @@ $(document).ready(function() {
 
 	// COUNTING PARAGRAPHS
 	$("li#content li.paragraph").waypoint(function(direction) {
+	
+		//changeHash( $(this).attr("id") );
 		
 		if(direction === "down") {
 			currParagraphNum++;

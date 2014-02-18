@@ -29,6 +29,8 @@ a { color: #000000; }
 
 a:hover { opacity: 1 !important; }
 
+a.selected { background-color: yellow; padding: 0.35em 0.5em 0.25em 0.5em; text-decoration: none !important; }
+
 div#cover { position: relative; z-index: 9999; background-color: #323232; height: 100%; }
 div#cover h1 { font-family: Helvetica, Arial, sans-serif; color: white; margin: 0; font-weight: 700; position: absolute; top: 50%; margin-top: -2.8125em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); }
 div#cover div.arrow { width: 1em; height: 1em; border-width: 0 0.5em 0.5em 0; border-color: white; border-style: solid; transform: rotate(45deg); position: absolute; top: 50%; margin-top: -0.75em; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); }
@@ -58,8 +60,8 @@ ul#nav.home h3#toc { display: none; }
 
 ul#publish { background-color: #323232 !important; margin-top: 4.5em; color: white; position: relative; z-index: 100; max-height: 0; overflow: hidden; transition: max-height 0.25s, padding 0.5s; }
 ul#publish button { width: 100%; background-color: white; color: #000000; margin-top: 3.4286em; padding: 0; }
-ul#publish button[name=view] { margin-top: 5.1429em; }
-ul#publish button[name=download] { margin-top: 1.7143em; }
+ul#publish button.view { margin-top: 5.1429em; }
+ul#publish button.download { margin-top: 1.7143em; }
 ul#publish input { width: 100%; border: 0; box-sizing: border-box; margin-top: 1.5em; height: 3em; font-size: 1em; line-height: 1.5; background-color: rgba(255, 255, 255, 0.25); }
 ul#publish input.title { background: none; font-family: Helvetica, Arial, sans-serif; font-size: 1.5em; color: white; height: 2em; padding: 0; margin: 0; }
 ul#publish input.title:focus { color: white; }
@@ -67,7 +69,7 @@ ul#publish input.title::-webkit-input-placeholder { /* WebKit browsers */ color:
 ul#publish input.title:-moz-placeholder { /* Mozilla Firefox 4 to 18 */ color: rgba(255, 255, 255, 0.25); }
 ul#publish input.title::-moz-placeholder { /* Mozilla Firefox 19+ */ color: rgba(255, 255, 255, 0.25); }
 ul#publish input.title:-ms-input-placeholder { /* Internet Explorer 10+ */ color: rgba(255, 255, 255, 0.25); }
-ul#publish button[name=clear] { background-color: #a21b00; color: white; }
+ul#publish button.clear { background-color: #a21b00; color: white; }
 
 body.publish-mode ul#nav li:not(#collector) { display: none; }
 body.publish-mode li#collector { position: relative; z-index: 100; }
@@ -75,6 +77,21 @@ body.publish-mode li#collector div { background-color: #323232 !important; paddi
 body.publish-mode li#collector span { display: none; }
 body.publish-mode ul#publish { padding: 6em 0; max-height: 28em; }
 body.publish-mode div#dimmer { display: block; cursor: pointer; }
+
+div#edition-selector { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; background-color: rgba(255, 255, 255, 0.95); z-index: 9999; }
+div#edition-selector div#original { border-bottom: 0.125em solid #323232; }
+div#edition-selector div#original h2 { margin-top: 1em; }
+div#edition-selector h3 { padding: 1.5em 0 1.5em 0; margin: 0; }
+div#edition-selector h3#close { font-size: 2em; font-weight: 500; text-align: right; padding: 0.75em; line-height: 0.75; box-sizing: border-box; }
+div#edition-selector h3#close span { cursor: pointer; }
+div#edition-selector p { margin: 0 0 2.57143em 0; }
+div#edition-selector ul#tabs { margin-top: 2.57143em; text-align: right; font-family: "Courier New", monospace; }
+div#edition-selector ul#tabs a { text-decoration: none; }
+div#edition-selector ul#tabs a.selected { margin-right: -0.5em; }
+div#edition-selector ul.list { position: absolute; top: 12em; bottom: 0; right: 0; padding: 2.25em 33.33333333% 0 0; overflow: scroll; }
+
+body.edition-select-mode ul#nav { display: none; }
+body.edition-select-mode div#edition-selector { display: block; }
 
 ul#wrapper { position: relative; top: 0; min-height: 100%; }
 ul#wrapper li.introduction { margin-bottom: 18em; }
@@ -86,11 +103,13 @@ ul#wrapper li.chapter div.img img { width: 100%; height: auto; margin: 0; paddin
 ul#wrapper li.chapter div.img { width: 100%; }
 ul#wrapper li.chapter div.title { margin-top: -4.5em; }
 ul#wrapper li.chapter div.separator { margin: 2.25em 0 12em 0; }
-ul#wrapper li.paragraph { margin: 1.5em 0; }
+ul#wrapper li.chapter.empty { opacity: 0.25; }
+ul#wrapper li.chapter.empty img { z-index: -1; position: relative; }
+ul#wrapper li.paragraph { margin: -6em 0 1.5em 0; padding: 6em 0 0 0; }
 ul#wrapper li.paragraph p { margin: 0; box-sizing: border-box; padding: 0 1.5em 0 0; background-color: white; }
 ul#wrapper li.paragraph div.paragraph-num { text-align: center; box-sizing: border-box; padding: 0 1.5em 0 0.75em; }
 ul#wrapper li.paragraph div.paragraph-num a { opacity: 0.25; text-decoration: none; }
-ul#wrapper li.paragraph div.paragraph-num a.selected { background-color: yellow; padding: 0.35em 0.5em 0.25em 0.5em; text-decoration: none !important; opacity: 1; }
+ul#wrapper li.paragraph div.paragraph-num a.selected { opacity: 1; }
 ul#wrapper li.paragraph div.collection-count { opacity: 0.25; }
 ul#wrapper li.paragraph ul.more { opacity: 0.25; display: none; }
 ul#wrapper li.paragraph ul.more li:first-child { cursor: move; }
@@ -137,7 +156,7 @@ div#dimmer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; display: non
 
 .locked { overflow: hidden; }
 
-.separator { height: 0; border-bottom: 2px solid black; }
+.separator { height: 0; border-bottom: 0.125em solid #323232; }
 
 button { appearance: none; border: 0; background-color: #323232; color: white; height: 3.429em; padding: 0 2em; outline: none; }
 

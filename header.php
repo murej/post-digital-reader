@@ -1,19 +1,31 @@
 <?php 
 
 	global $edition;
+	global $allEditions;
 	global $chapters;
 	global $chapterTitle;
-	
-	$edition = get_term_by('slug', $_GET["edition"], 'post_tag');
-	$chapters = get_categories(); 
-	$chapterTitle = single_cat_title('', false);
+	global $paragraphIDs;
 
-	// show original edition if there is no edition set and it was not explicitly cleared
-	if( !isset( $_GET["edition"] ) && !isset( $_COOKIE['clearedEditions'] ) ){
-		set_edition("original", $_SERVER['REQUEST_URI']);		
+	if( $_GET["edition"] === "-1" ) {
+	
+		$edition = "-1";
+		$paragraphIDs = json_decode( urldecode( $_COOKIE["myCollection"] ) );
 	}
+	else {
 
+		$edition = get_term_by('slug', $_GET["edition"], 'post_tag');
 	
+		// show original edition if there is no edition set and it was not explicitly cleared
+		if( $edition === false && !isset( $_COOKIE['clearedEditions'] ) ){
+			set_edition("original", $_SERVER['REQUEST_URI']);		
+		}
+	}
+	
+	$chapters = get_categories('exclude=1&hide_empty=0'); 
+	$chapterTitle = single_cat_title('', false);
+	
+	$allEditions = get_tags('exclude='.get_term_by('slug','original','post_tag')->term_id);
+			
 ?>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -70,50 +82,96 @@
 
 <?php } ?>
         
-        <ul id="nav" class="pure-g <?php if( is_home() ) { echo "home start"; } ?>">
+	<ul id="nav" class="pure-g <?php if( is_home() ) { echo "home start"; } ?>">
         
-			<li id="collector" class="pure-u-1-12"><div>0</div><span></span></li>
-<?php if($edition) { ?>
-			<li class="pure-u-1-6 viewing system">edition:</li>
-			<li class="pure-u-1-2">
+		<li id="collector" class="pure-u-1-12"><div>0</div><span></span></li>
+<?php if($edition === "-1") { ?>
+		<li class="pure-u-1-6 viewing system"></li>
+		<li class="pure-u-1-2">
 			
-				<h3><?php echo $edition->name; ?></h3>
+			<h3>My collection</h3>
 				
-				<ul id="edition-options" class="system">
-					<li><a href="">change</a></li>
-					<li><a href="">download</a></li>
-					<li><a href="">reset</a></li>
-					<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">clear</a></li>
-				</ul>
+			<ul id="edition-options" class="system">
+				<li><a href="#change">change</a></li>
+				<li><a href="">download</a></li>
+				<li><a href="">reset</a></li>
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">clear</a></li>
+			</ul>
 				
-			</li>
+		</li>
+<?php } else if($edition) { ?>
+		<li class="pure-u-1-6 viewing system">edition:</li>
+		<li class="pure-u-1-2">
+			
+			<h3><?php echo $edition->name; ?></h3>
+				
+			<ul id="edition-options" class="system">
+				<li><a href="#change">change</a></li>
+				<li><a href="">download</a></li>
+				<li><a href="">reset</a></li>
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">clear</a></li>
+			</ul>
+				
+		</li>
 <?php } else { ?>
-			<li class="pure-u-1-6 viewing system"></li>
-			<li class="pure-u-1-2 no-edition">
+		<li class="pure-u-1-6 viewing system"></li>
+		<li class="pure-u-1-2 no-edition">
 				
-				<h3>Viewing all editions </h3>
+			<h3>Showing all editions</h3>
 						
-				<ul id="edition-options" class="system">
-					<li><a href="">change</a></li>
-				</ul>
+			<ul id="edition-options" class="system">
+				<li><a href="#change">change</a></li>
+			</ul>
 				
-			</li>
+		</li>
 <?php } ?>
-			<li class="pure-u-1-6"></li>
-			<li class="pure-u-1-12">
-				<h3 id="toc">
-					<a href="<?php if($edition) { echo add_query_arg( array("edition" => $_GET["edition"]), bloginfo('url')); } else { echo bloginfo('url'); } ?>">
-						<span class="system">&equiv; </span>TOC
-					</a>
-				</h3>
-			</li>
+		<li class="pure-u-1-6"></li>
+		<li class="pure-u-1-12">
+			<h3 id="toc">
+				<a href="<?php if($edition) { echo add_query_arg( array("edition" => $_GET["edition"]), bloginfo('url')); } else { echo bloginfo('url'); } ?>">
+					<span class="system">&equiv; </span>TOC
+				</a>
+			</h3>
+		</li>
 			        
-        </ul>
+	</ul>
 
-<!--
-        <ul id="edition-selector">
+	<div id="edition-selector" class="pure-g">
+
+		<div class="pure-u-1-4"></div>				
+		<h3 class="pure-u-5-12">Published editions of this book</h3>
+		<h3 id="close" class="pure-u-1-3"><span>&times;</span></h3>				
+
+		<div class="pure-u-1-4"></div>				
+		<div id="original" class="pure-u-1-2">
+			<h2><a href="<?php echo get_edition_URL("original", get_bloginfo('url')); ?>">Original edition</a> &rarr;</h2>
+			<p class="system">by <a href="http://www.juremartinec.net/">Jure Martinec</a> on February 24, 2014</p>
+		</div>		
+		<div class="pure-u-1-4"></div>				
+
+		<ul id="tabs" class="pure-u-1-6">
+			<li><a href="#list-all" class="selected">All (<?php echo count($allEditions); ?>)</a></li>
+			<li><a href="#list-liked">Liked (0)</a></li>
+			<li><a href="#list-my">My (0)</a></li>
+		</ul>
+
+		<div class="pure-u-1-12"></div>
         
-        	
-        
-        </ul>
--->
+		<ul id="list-all" class="pure-u-5-12 list">
+<?php 	foreach( $allEditions as $edition ) { ?>
+			<li id="edition-<?php echo $edition->term_id; ?>">
+				<h2><a href="<?php echo get_edition_URL($edition->slug, get_bloginfo('url')); ?>"><?php echo $edition->name; ?></a> &rarr;</h2>
+				<p class="system">by <a href="">Craig McDonald</a> on March 12, 2014</p>
+			</li>
+<?php	} 
+?>		</ul>
+
+		<ul id="list-liked" class="pure-u-5-12 list">
+			<li>liked</li>
+		</ul>
+		<ul id="list-my" class="pure-u-5-12 list">
+			<li>my</li>
+		</ul>
+
+	</div>
+	

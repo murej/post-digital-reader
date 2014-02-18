@@ -14,7 +14,7 @@
 				Licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.<br><br>
 				Powered by <a href="http://www.wordpress.org/">Wordpress</a>.</h3>
 			</li>
-        
+
         </ul>
 
 <?php } ?>

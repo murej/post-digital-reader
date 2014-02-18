@@ -13,13 +13,21 @@
 				
 			</li>
 
-<?php	
+<?php
 	foreach($chapters as $chapter) {
+	
+		$postQuery['category'] = $chapter->cat_ID;
+		if($edition === "-1") { $postQuery['post__in'] = $paragraphIDs; }
+		else if($edition) { $postQuery['tag'] = $_REQUEST['edition']; }
+		$checkForPosts = get_posts($postQuery);
+		
 ?>
-        	<li id="ch-<?php echo $chapter->cat_ID; ?>" class="pure-g chapter">
-				
+        	<li id="ch-<?php echo $chapter->cat_ID; ?>" class="pure-g chapter<?php if(!$checkForPosts) { echo " empty"; } ?>">
+
+<?php 	if($checkForPosts) { ?>
 				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapter->cat_ID)); ?>"> 
-				
+<?php 	} ?>
+
 	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.gif" alt="Illustration"></div>
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 title">
@@ -29,12 +37,16 @@
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 separator"></div>
-        		
+
+<?php 	if($checkForPosts) { ?>
 				</a>
+<?php 	} ?>
 
         	</li>
 <?php
+		wp_reset_postdata();
 	}
+	
 ?>
         	
         	<li id="subscribe" class="pure-g action">
@@ -73,7 +85,12 @@
 				<div class="pure-u-1-4"></div>
 				<div class="pure-u-1-4 padded">
 	        		
-	        		<form action=""><button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>View collected</button></form>
+					<form method="get" action="<?php bloginfo('url'); ?>">
+					
+						<input type="hidden" name="edition" value="-1">
+						<button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>View collected</button>
+					</form>
+					
 				</div>
 				
 				<div class="pure-u-1-4">

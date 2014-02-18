@@ -79,6 +79,13 @@ a:hover {
 	opacity: 1 !important;
 }
 
+a.selected {
+	background-color: yellow;
+	padding: 0.35em 0.5em 0.25em 0.5em;
+	text-decoration: none !important;
+}
+
+
 div#cover {
 	
 	position: relative;
@@ -267,10 +274,10 @@ ul#publish {
 		margin-top: 3.4286em;
 		padding: 0;
 	}
-	button[name=view] {
+	button.view {
 		margin-top: 5.1429em;
 	}
-	button[name=download] {
+	button.download {
 		margin-top: 1.7143em;
 	}
 	input {
@@ -314,7 +321,7 @@ ul#publish {
 	    color: rgba($secondary-color,0.25);
 	}
 	
-	button[name=clear] {
+	button.clear {
 		background-color: $alert-color;
 		color: $secondary-color;
 	}
@@ -342,6 +349,75 @@ body.publish-mode {
 		display: block;
 		cursor: pointer;
 	}
+	
+}
+
+div#edition-selector {
+
+	display: none;
+
+	position: fixed;
+	top:0;
+	right:0;
+	bottom:0;
+	left:0;
+	
+	background-color: rgba($secondary-color, 0.95);
+	z-index: 9999;
+	
+	
+	div#original {
+		border-bottom: 0.125em solid $primary-color;
+		
+		h2 {
+			margin-top: 1em;
+		}
+	}
+
+	h3 {
+		padding: 1.5em 0 1.5em 0;
+		margin: 0;
+
+	}
+	
+	h3#close {
+		font-size: 2em;
+		font-weight: 500;
+		text-align: right;
+		padding: 0.75em;
+		line-height: 0.75;
+		box-sizing: border-box;
+		
+		span { cursor: pointer; }
+	}
+	
+	p { margin: 0 0 2.57143em 0; }
+	
+	ul#tabs {
+		
+		margin-top: 2.57143em;
+		
+		text-align: right;
+		font-family: $system-font-stack;
+
+		a { text-decoration: none; }
+		a.selected { margin-right: -0.5em; }
+	}
+	
+	ul.list {
+		position: absolute;
+		top: 12em;
+		bottom: 0;
+		right: 0;
+		padding: 2.25em 33.33333333% 0 0;
+		overflow: scroll;
+	}
+}
+
+body.edition-select-mode {
+	
+	ul#nav { display: none; }
+	div#edition-selector { display: block; }
 	
 }
 
@@ -397,10 +473,16 @@ ul#wrapper {
 		
 		padding: 0 0 1.5em 0;
 	}
+
+	li.chapter.empty {
+		opacity: 0.25;
+		img { z-index: -1; position: relative; }
+	}
 	
 	li.paragraph {
 	
-		margin: 1.5em 0;
+		margin: -6em 0 1.5em 0;
+		padding: 6em 0 0 0;
 	
 		p {
 			margin: 0;
@@ -417,9 +499,6 @@ ul#wrapper {
 			a { opacity: 0.25; text-decoration: none; }
 								
 			a.selected {
-				background-color: yellow;
-				padding: 0.35em 0.5em 0.25em 0.5em;
-				text-decoration: none !important;
 				opacity: 1;
 			}
 		}
@@ -658,7 +737,7 @@ div#dimmer {
 }
 .separator {
 	height: 0;
-	border-bottom: 2px solid black;
+	border-bottom: 0.125em solid $primary-color;
 }
 
 button {

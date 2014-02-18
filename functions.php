@@ -1,10 +1,14 @@
 <?php
 
-function set_edition($parameter, $url) {
+function get_edition_URL($parameter, $url) {
 
-	$editionURL = add_query_arg( array("edition" => $parameter), $url );
+	return add_query_arg( array("edition" => $parameter), $url );
 	
-	Header("Location: " . $editionURL);
+}
+
+function set_edition($parameter, $url) {
+	
+	Header("Location: " . get_edition_URL($parameter, $url));
 	exit;
 
 }
