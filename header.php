@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 	global $edition;
 	global $allEditions;
@@ -6,10 +6,19 @@
 	global $chapterTitle;
 	global $paragraphIDs;
 
-	if( $_GET["edition"] === "-1" ) {
+	$chapters = get_categories('exclude=1&hide_empty=0'); 
+	$chapterTitle = single_cat_title('', false);
+	
+	$allEditions = get_tags('exclude='.get_term_by('slug','original','post_tag')->term_id);
+
+	if($_GET['generatePDF']) {
+	
+		generate_PDF($_GET['edition'], $chapters);
+	}
+	else if( $_GET["edition"] === "-1" ) {
 	
 		$edition = "-1";
-		$paragraphIDs = json_decode( urldecode( $_COOKIE["myCollection"] ) );
+		$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
 	}
 	else {
 
@@ -20,12 +29,7 @@
 			set_edition("original", $_SERVER['REQUEST_URI']);		
 		}
 	}
-	
-	$chapters = get_categories('exclude=1&hide_empty=0'); 
-	$chapterTitle = single_cat_title('', false);
-	
-	$allEditions = get_tags('exclude='.get_term_by('slug','original','post_tag')->term_id);
-			
+				
 ?>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -49,7 +53,7 @@
 
     </head>
     
-    <body>
+    <body class="<?php if( is_home() ) { echo "start cover"; } ?>">
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
@@ -59,9 +63,8 @@
         <div id="cover" class="shadow">
         	
         	<div class="pure-g">
-
-        		<div class="pure-u-1-6"></div>
-        		<div class="pure-u-1-6"><div class="arrow"></div></div>
+        	
+        		<div class="pure-u-1-4"></div>
 				<div class="pure-u-1-2">
 					
 					<h1>
@@ -72,9 +75,11 @@
 						digital <i class="strikethrough serif">media</i> age<br>
 					</h1>
 					
-					<iframe class="facebook" src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.postdigitalreader.com%2F&amp;width&amp;layout=button_count&amp;action=recommend&amp;show_faces=true&amp;share=false&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:21px;" allowTransparency="true"></iframe>
-					
 				</div>
+
+        		<div class="pure-u-1-12"></div>
+        		<div class="pure-u-1-12"><div class="arrow"></div></div>
+        		<div class="pure-u-1-12"></div>
 				        	
         	</div>
         	
@@ -82,7 +87,7 @@
 
 <?php } ?>
         
-	<ul id="nav" class="pure-g <?php if( is_home() ) { echo "home start"; } ?>">
+	<ul id="nav" class="pure-g <?php if( is_home() ) { echo "home"; } ?>">
         
 		<li id="collector" class="pure-u-1-12"><div>0</div><span></span></li>
 <?php if($edition === "-1") { ?>
@@ -92,10 +97,10 @@
 			<h3>My collection</h3>
 				
 			<ul id="edition-options" class="system">
+				<li><a href="">publish</a></li>
+				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>">print</a></li>
 				<li><a href="#change">change</a></li>
-				<li><a href="">download</a></li>
-				<li><a href="">reset</a></li>
-				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">clear</a></li>
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">unselect</a></li>
 			</ul>
 				
 		</li>
@@ -106,10 +111,10 @@
 			<h3><?php echo $edition->name; ?></h3>
 				
 			<ul id="edition-options" class="system">
+				<?php if($edition->slug !== "original") { ?><li><a href="">like</a></li><?php } ?>
+				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>">print</a></li>
 				<li><a href="#change">change</a></li>
-				<li><a href="">download</a></li>
-				<li><a href="">reset</a></li>
-				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">clear</a></li>
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">unselect</a></li>
 			</ul>
 				
 		</li>
@@ -144,7 +149,7 @@
 
 		<div class="pure-u-1-4"></div>				
 		<div id="original" class="pure-u-1-2">
-			<h2><a href="<?php echo get_edition_URL("original", get_bloginfo('url')); ?>">Original edition</a> &rarr;</h2>
+			<h2><a href="<?php echo get_edition_URL("original", get_bloginfo('url')); ?>">Original edition</a></h2>
 			<p class="system">by <a href="http://www.juremartinec.net/">Jure Martinec</a> on February 24, 2014</p>
 		</div>		
 		<div class="pure-u-1-4"></div>				
@@ -158,9 +163,9 @@
 		<div class="pure-u-1-12"></div>
         
 		<ul id="list-all" class="pure-u-5-12 list">
-<?php 	foreach( $allEditions as $edition ) { ?>
-			<li id="edition-<?php echo $edition->term_id; ?>">
-				<h2><a href="<?php echo get_edition_URL($edition->slug, get_bloginfo('url')); ?>"><?php echo $edition->name; ?></a> &rarr;</h2>
+<?php 	foreach( $allEditions as $oneEdition ) { ?>
+			<li id="edition-<?php echo $oneEdition->term_id; ?>">
+				<h2><a href="<?php echo get_edition_URL($oneEdition->slug, get_bloginfo('url')); ?>"><?php echo $oneEdition->name; ?></a></h2>
 				<p class="system">by <a href="">Craig McDonald</a> on March 12, 2014</p>
 			</li>
 <?php	} 

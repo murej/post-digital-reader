@@ -85,6 +85,42 @@ a.selected {
 	text-decoration: none !important;
 }
 
+body.start {
+
+	div#cover {
+		top: 0 !important;
+
+		div.arrow {
+			margin-top: 100%;
+			opacity: 0;
+		}
+	}
+
+/*
+	ul#wrapper {
+		top: 0;
+	}
+*/
+}
+
+body.cover {
+	div#cover {
+		
+	}
+
+	ul#nav {
+		position: relative !important;
+		height: 100% !important;
+		top:-4.5em;
+		background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.25), transparent) !important;
+	}
+
+	ul#wrapper {
+		top: 0;
+		position: fixed;
+	}
+
+}
 
 div#cover {
 	
@@ -93,7 +129,12 @@ div#cover {
 	
 	background-color: $primary-color;
 	height: 100%;
-			
+
+	top: -4.5em;
+
+	transition: top 1s;
+	transition-delay: 1s;
+				
 	h1 {
 		
 		font-family: $primary-font-stack;
@@ -103,7 +144,7 @@ div#cover {
 		
 		position: absolute;
 		top: 50%;
-		margin-top: -2.8125em;
+		margin-top: -2.25em;
 		
 		text-shadow: 2px 2px 4px rgba(0,0,0,0.25);
 	}
@@ -121,7 +162,10 @@ div#cover {
 		margin-top: -0.75em;
 
 		box-shadow: 2px 2px 4px rgba(0,0,0,0.25);
-
+		
+		transition: margin-top 2s, opacity 0.5s;
+		transition-delay: 0s, 1.55s;
+		opacity: 1;
 	}
 	.facebook {
 		position: absolute;
@@ -144,7 +188,7 @@ ul#nav {
 	padding: 0;
 	margin: 0;
 	height: 4.5em;
-	
+		
 	background-color: rgba(255,255,255,0.95);
 	
 	h3 {
@@ -233,13 +277,6 @@ ul#nav {
 		border-right: 3em solid $primary-color;
 		margin: 0 1.5em 0 0.75em;
 	}
-}
-
-
-ul#nav.start {
-	position: relative !important;
-	height: 100% !important;
-	background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.25), transparent) !important;
 }
 
 ul#nav.home {
@@ -362,9 +399,10 @@ div#edition-selector {
 	bottom:0;
 	left:0;
 	
-	background-color: rgba($secondary-color, 0.95);
+	background-color: rgba($secondary-color, 1);
 	z-index: 9999;
 	
+	border: 1em solid $primary-color;
 	
 	div#original {
 		border-bottom: 0.125em solid $primary-color;
@@ -421,11 +459,10 @@ body.edition-select-mode {
 	
 }
 
-
 ul#wrapper {
 	
 	position: relative;
-	top: 0;
+	top: -4.5em;
 	
 	min-height: 100%;
 	
@@ -504,6 +541,7 @@ ul#wrapper {
 		}
 		
 		div.collection-count {
+			text-transform: none;
 			opacity: 0.25;
 		}
 		
@@ -679,6 +717,10 @@ ul#footer {
 	
 	.twitter-follow-button {
 		margin: 0.5em 0 3em 0;
+	}
+
+	.facebook {
+		margin: 0.6em 0 1.6em 0;
 	}
 	
 }

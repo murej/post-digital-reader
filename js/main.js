@@ -195,6 +195,19 @@ function resizeRibbon() {
 	$("#collector span").css("border-right-width",(ribbonWidth/16/2)+"em");
 }
 
+function handleCover() {
+	
+	if( $("div#cover").length !== 0 ) {
+	
+		if( $("body").scrollTop() === 0 ) {
+			$("body").removeClass("start");
+		}
+		else {
+/* 			$("body").removeClass("start"); */
+		}
+	}
+}
+
 function setParagraphNum(currParagraphNum, allParagraphNum) {
 	$("li#loc div").html("&larr; "+currParagraphNum+"/"+allParagraphNum);
 }
@@ -369,6 +382,7 @@ $(document).ready(function() {
 		
 	/* INITIALISE */
 	resizeRibbon();
+	handleCover();
 	collectParagraphs();
 	$("div#edition-selector").tabs();
 	allParagraphNum = $("ul#wrapper li p").length;
@@ -383,23 +397,35 @@ $(document).ready(function() {
 	
 	// enable cover slideout effect when cover present
 	if( $('div#cover').length !== 0 ) {
-		$("ul#wrapper").css("position","fixed");
+		$("ul#wrapper").addClass("cover");
 	}
+	
+	$("body").waypoint(function() {
+		$(this).removeClass("start");
+	});
 	
 	$('div#cover').waypoint(function(direction) {
 	
 		if(direction === "down") {
+			$("body").removeClass("start cover");
+/*
+			$("ul#wrapper").removeClass("start");
 			$("ul#wrapper").css("position","relative");
 			$("ul#nav").removeClass("start");
+*/
 		}
 		else {
+			$("body").addClass("cover");
+/*
+			$("ul#wrapper").addClass("start");
 			$("ul#wrapper").css("position","fixed");
 			$("ul#nav").addClass("start");
+*/
 		}
 		
 	}, {
 		offset: function() {
-			return -$(this).height();
+			return -$(this).height()+$("ul#nav li").height();
 		}
 	});
 	
@@ -413,9 +439,7 @@ $(document).ready(function() {
 	$("ul#nav a[href=#change]").click(function(e) {
 	
 		e.preventDefault();
-		
-		//alert("change");
-		
+				
 		if( $("body.edition-select-mode").length !== 0 ) {
 			$("body").removeClass("edition-select-mode locked");
 		} else {

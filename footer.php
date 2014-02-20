@@ -12,7 +12,12 @@
         	<li class="pure-u-1-6">
         		<h3>Illustrations by <a href="http://ilustratorcek.tumblr.com/" target="_blank">Matija Medved</a>.<br><br>
 				Licensed under <a href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.<br><br>
-				Powered by <a href="http://www.wordpress.org/">Wordpress</a>.</h3>
+				Powered by <a href="http://www.wordpress.org/">Wordpress</a>.<br><br><br></h3>
+				
+				<iframe class="facebook" src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.postdigitalreader.com%2F&amp;width&amp;layout=button_count&amp;action=recommend&amp;show_faces=true&amp;share=false&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:21px;" allowTransparency="true"></iframe>
+				
+				<a href="https://twitter.com/share" class="twitter-share-button" data-via="youremartinets">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 			</li>
 
         </ul>

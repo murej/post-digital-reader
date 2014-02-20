@@ -86,7 +86,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 	        		
 	        		<p class="pure-u-5-12 hyphenate"><?php echo str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ); ?></p>
 	
-	        		<div class="pure-u-1-4 collection-count system">(113x)</div>
+	        		<div class="pure-u-1-4 collection-count system">(<?php echo count(get_the_tags());?>x)</div>
 
 	        		<ul class="pure-u-1-12 more system">
 		        		<li><span>&equiv; </span><a href="">MOVE</a></li>
