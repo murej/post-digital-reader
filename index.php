@@ -89,8 +89,8 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 	        		<div class="pure-u-1-4 collection-count system">(<?php echo count(get_the_tags());?>x)</div>
 
 	        		<ul class="pure-u-1-12 more system">
-		        		<li><span>&equiv; </span><a href="">MOVE</a></li>
-		        		<li><span>&infin; </span><a href="">SHARE</a></li>
+		        		<?php if($edition === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
+		        		<li class="share"><span>&infin; </span><a href="">SHARE</a></li>
 	        		</ul>
 
 	        		<div class="link">
@@ -125,7 +125,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
         		</ul>
 	        
         	</li>
-        	
+<?php if( $edition === "-1" ) { ?>    	
         	<li id="add-content" class="pure-g add-content">
         	
         		<ul id="adding-options">
@@ -148,16 +148,20 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 						<input type="hidden" value="<?php echo str_replace('/wp-content/themes', '', get_theme_root()); ?>/wp-blog-header.php" name="rootpath">
 						<?php wp_nonce_field(); ?>
 	        			
-	        			<textarea name="paragraph" placeholder="Start typing here..."></textarea>
+	        			<textarea name="paragraph" placeholder="Start typing and press enter to submit"></textarea>
+<!--
 	        			<div class="buttons">
 	        				<button type="submit" class="system">Add paragraph</button><span class="system"> or <a href="#" class="cancel">cancel</a></span>
 	        			</div>
+-->
 	        		
 	        		</form>
 				
 		        </div>
         	
         	</li>
+
+<?php } ?>
         	
 <?php if( $currentChapterKey+1 <= count($chapters)-1  ) { ?>
 

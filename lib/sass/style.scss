@@ -132,8 +132,8 @@ div#cover {
 
 	top: -4.5em;
 
-	transition: top 1s;
-	transition-delay: 1s;
+	transition: top 0.5s;
+	transition-delay: 2s;
 				
 	h1 {
 		
@@ -159,12 +159,12 @@ div#cover {
 		
 		position: absolute;
 		top: 50%;
-		margin-top: -0.75em;
+		margin-top: 3em;
 
 		box-shadow: 2px 2px 4px rgba(0,0,0,0.25);
 		
-		transition: margin-top 2s, opacity 0.5s;
-		transition-delay: 0s, 1.55s;
+		transition: margin-top 1.5s, opacity 0.5s;
+		transition-delay: 0s, 1s;
 		opacity: 1;
 	}
 	.facebook {
@@ -402,7 +402,7 @@ div#edition-selector {
 	background-color: rgba($secondary-color, 1);
 	z-index: 9999;
 	
-	border: 1em solid $primary-color;
+	border: 2em solid $primary-color;
 	
 	div#original {
 		border-bottom: 0.125em solid $primary-color;
@@ -549,7 +549,7 @@ ul#wrapper {
 			opacity: 0.25;
 			display: none;
 			
-			li:first-child {
+			li.move {
 				cursor: move;
 				
 				a {

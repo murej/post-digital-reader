@@ -42,9 +42,9 @@ body.start div#cover div.arrow { margin-top: 100%; opacity: 0; }
 body.cover ul#nav { position: relative !important; height: 100% !important; top: -4.5em; background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.25), transparent) !important; }
 body.cover ul#wrapper { top: 0; position: fixed; }
 
-div#cover { position: relative; z-index: 9999; background-color: #323232; height: 100%; top: -4.5em; transition: top 1s; transition-delay: 1s; }
+div#cover { position: relative; z-index: 9999; background-color: #323232; height: 100%; top: -4.5em; transition: top 0.5s; transition-delay: 2s; }
 div#cover h1 { font-family: Helvetica, Arial, sans-serif; color: white; margin: 0; font-weight: 700; position: absolute; top: 50%; margin-top: -2.25em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); }
-div#cover div.arrow { width: 1em; height: 1em; border-width: 0 0.5em 0.5em 0; border-color: white; border-style: solid; transform: rotate(45deg); position: absolute; top: 50%; margin-top: -0.75em; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); transition: margin-top 2s, opacity 0.5s; transition-delay: 0s, 1.55s; opacity: 1; }
+div#cover div.arrow { width: 1em; height: 1em; border-width: 0 0.5em 0.5em 0; border-color: white; border-style: solid; transform: rotate(45deg); position: absolute; top: 50%; margin-top: 3em; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); transition: margin-top 1.5s, opacity 0.5s; transition-delay: 0s, 1s; opacity: 1; }
 div#cover .facebook { position: absolute; top: 50%; /* 		bottom: 4em; */ margin-top: 13.7em; }
 
 ul#nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; padding: 0; margin: 0; height: 4.5em; background-color: rgba(255, 255, 255, 0.95); }
@@ -87,7 +87,7 @@ body.publish-mode li#collector span { display: none; }
 body.publish-mode ul#publish { padding: 6em 0; max-height: 28em; }
 body.publish-mode div#dimmer { display: block; cursor: pointer; }
 
-div#edition-selector { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; background-color: white; z-index: 9999; border: 1em solid #323232; }
+div#edition-selector { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; background-color: white; z-index: 9999; border: 2em solid #323232; }
 div#edition-selector div#original { border-bottom: 0.125em solid #323232; }
 div#edition-selector div#original h2 { margin-top: 1em; }
 div#edition-selector h3 { padding: 1.5em 0 1.5em 0; margin: 0; }
@@ -121,8 +121,8 @@ ul#wrapper li.paragraph div.paragraph-num a { opacity: 0.25; text-decoration: no
 ul#wrapper li.paragraph div.paragraph-num a.selected { opacity: 1; }
 ul#wrapper li.paragraph div.collection-count { text-transform: none; opacity: 0.25; }
 ul#wrapper li.paragraph ul.more { opacity: 0.25; display: none; }
-ul#wrapper li.paragraph ul.more li:first-child { cursor: move; }
-ul#wrapper li.paragraph ul.more li:first-child a { cursor: move; }
+ul#wrapper li.paragraph ul.more li.move { cursor: move; }
+ul#wrapper li.paragraph ul.more li.move a { cursor: move; }
 ul#wrapper li.paragraph div.link { display: none; position: fixed; top: 50%; margin-top: -9.1875em; width: 100%; z-index: 100; background-color: white; }
 ul#wrapper li.paragraph div.link div.content { text-align: center; }
 ul#wrapper li.paragraph div.link div.content h2 { margin: 2em 0 2.75em 0; }

@@ -100,7 +100,7 @@
 				<li><a href="">publish</a></li>
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>">print</a></li>
 				<li><a href="#change">change</a></li>
-				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">unselect</a></li>
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li>
 			</ul>
 				
 		</li>
@@ -114,7 +114,7 @@
 				<?php if($edition->slug !== "original") { ?><li><a href="">like</a></li><?php } ?>
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>">print</a></li>
 				<li><a href="#change">change</a></li>
-				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">unselect</a></li>
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li>
 			</ul>
 				
 		</li>
