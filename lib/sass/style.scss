@@ -85,6 +85,13 @@ a.selected {
 	text-decoration: none !important;
 }
 
+q {
+	font-style: italic;
+	quotes:'“' '”';
+}
+q:before { content: open-quote; }
+q:after  { content: close-quote; }
+
 body.start {
 
 	div#cover {
@@ -246,7 +253,6 @@ ul#nav {
 			border-right-color: rgba($primary-color,0.95);
 		}
 	}
-	
 }
 
 #collector {
@@ -526,9 +532,21 @@ ul#wrapper {
 			box-sizing: border-box;
 			padding: 0 1.5em 0 0;
 			background-color: $secondary-color;
+			
+			a.ref-link {
+				text-decoration: none;				
+				
+				padding: 0  0 0 0.25em;
+				
+				font-size: 1em;
+			}
+			a.ref-link:hover {
+				font-weight: bold;
+			}
 		}
 		
 		div.paragraph-num {
+		
 			text-align: center;
 			box-sizing: border-box;
 			padding: 0 1.5em 0 0.75em;
@@ -539,10 +557,19 @@ ul#wrapper {
 				opacity: 1;
 			}
 		}
+
+		div.paragraph-num.hover {
+		
+			a {
+				opacity: 1 !important;
+				text-decoration: underline;
+			}
+		}
 		
 		div.collection-count {
 			text-transform: none;
 			opacity: 0.25;
+			cursor: help;
 		}
 		
 		ul.more {
@@ -591,13 +618,19 @@ ul#wrapper {
 		div.paragraph-num {
 			
 			a {
-				opacity: 1;
 				text-decoration: underline;
 			}
 		}
 		
 		ul.more {
 			display: inline-block;
+		}
+	}
+	
+	li.paragraph.unpublished {
+		
+		div.paragraph-num {
+			//font-size: (14/14 * 1em);
 		}
 	}
 	

@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @import url(css/normalize.min.css);
 @import url(css/grids.min.css);
 /*
@@ -30,6 +31,12 @@ a { color: #000000; }
 a:hover { opacity: 1 !important; }
 
 a.selected { background-color: yellow; padding: 0.35em 0.5em 0.25em 0.5em; text-decoration: none !important; }
+
+q { font-style: italic; quotes: '“' '”'; }
+
+q:before { content: open-quote; }
+
+q:after { content: close-quote; }
 
 body.start { /*
 	ul#wrapper {
@@ -116,10 +123,13 @@ ul#wrapper li.chapter.empty { opacity: 0.25; }
 ul#wrapper li.chapter.empty img { z-index: -1; position: relative; }
 ul#wrapper li.paragraph { margin: -6em 0 1.5em 0; padding: 6em 0 0 0; }
 ul#wrapper li.paragraph p { margin: 0; box-sizing: border-box; padding: 0 1.5em 0 0; background-color: white; }
+ul#wrapper li.paragraph p a.ref-link { text-decoration: none; padding: 0  0 0 0.25em; font-size: 1em; }
+ul#wrapper li.paragraph p a.ref-link:hover { font-weight: bold; }
 ul#wrapper li.paragraph div.paragraph-num { text-align: center; box-sizing: border-box; padding: 0 1.5em 0 0.75em; }
 ul#wrapper li.paragraph div.paragraph-num a { opacity: 0.25; text-decoration: none; }
 ul#wrapper li.paragraph div.paragraph-num a.selected { opacity: 1; }
-ul#wrapper li.paragraph div.collection-count { text-transform: none; opacity: 0.25; }
+ul#wrapper li.paragraph div.paragraph-num.hover a { opacity: 1 !important; text-decoration: underline; }
+ul#wrapper li.paragraph div.collection-count { text-transform: none; opacity: 0.25; cursor: help; }
 ul#wrapper li.paragraph ul.more { opacity: 0.25; display: none; }
 ul#wrapper li.paragraph ul.more li.move { cursor: move; }
 ul#wrapper li.paragraph ul.more li.move a { cursor: move; }
@@ -127,7 +137,7 @@ ul#wrapper li.paragraph div.link { display: none; position: fixed; top: 50%; mar
 ul#wrapper li.paragraph div.link div.content { text-align: center; }
 ul#wrapper li.paragraph div.link div.content h2 { margin: 2em 0 2.75em 0; }
 ul#wrapper li.paragraph div.link div.content input { width: 100%; margin-bottom: 2em; }
-ul#wrapper li.paragraph:hover div.paragraph-num a { opacity: 1; text-decoration: underline; }
+ul#wrapper li.paragraph:hover div.paragraph-num a { text-decoration: underline; }
 ul#wrapper li.paragraph:hover ul.more { display: inline-block; }
 ul#wrapper li.add-content ul#adding-options { margin-bottom: 13.71em; }
 ul#wrapper li.add-content div#writer { display: none; position: relative; z-index: 100; overflow: scroll; }

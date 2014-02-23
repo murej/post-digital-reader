@@ -5,9 +5,16 @@
 	$currentChapterKey;
 
 	// query chapter (category) and filter paragraphs by edition (tag)
-	$queryParams = array( 'category__in' => array( $currentChapterID ) );
+	$queryParams = array( 
 	
-	if($edition === "-1") { $queryParams['post__in'] = $paragraphIDs; }
+		'orderby' => 'title',
+		'order' => 'ASC',
+		'nopaging' => true,
+		'category__in' => array( $currentChapterID )
+	
+	);
+	
+	if($edition === "-1") { $queryParams['post__in'] = $paragraphIDs; $queryParams['orderby'] = 'post__in'; }
 	else if($edition) { $queryParams['tag_id'] = $edition->term_id; }
 		
 	$the_query = new WP_Query($queryParams);
@@ -51,7 +58,7 @@
 
         <ul id="wrapper">
         	        
-        	<li id="ch1" class="pure-g chapter">
+        	<li id="chapter-<?php echo $currentChapterID; ?>" class="pure-g chapter">
         
         		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.gif"></div>
         		<div class="pure-u-1-4"></div>
@@ -79,37 +86,46 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 
 ?>
         	
-				<li id="paragraph-<?php the_ID(); ?>" class="pure-g paragraph">
-	        		
-	        		<div class="pure-u-1-12 paragraph-num system"><a href="">#<?php the_ID(); ?></a></div>
-	        		<div class="pure-u-1-6"></div>
-	        		
-	        		<p class="pure-u-5-12 hyphenate"><?php echo str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ); ?></p>
-	
-	        		<div class="pure-u-1-4 collection-count system">(<?php echo count(get_the_tags());?>x)</div>
-
-	        		<ul class="pure-u-1-12 more system">
-		        		<?php if($edition === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
-		        		<li class="share"><span>&infin; </span><a href="">SHARE</a></li>
-	        		</ul>
-
-	        		<div class="link">
-	        		
-	        			<div class="pure-u-1-6"></div>
-	        			<div class="pure-u-2-3 separator"></div>
-	        			<div class="pure-u-1-6"></div>
-
-	        			<div class="pure-u-1-4"></div>
-		        		<div class="pure-u-1-2 content"><h2>Link to paragraph #3</h2><form><input type="text" value="http://www.postdigitalreader.com/reactive-environments/?paragraph=3&edition=XXXXXXXX"></form></div>
-	        			<div class="pure-u-1-4"></div>
-
-	        			<div class="pure-u-1-6"></div>
-	        			<div class="pure-u-2-3 separator"></div>
-	        			<div class="pure-u-1-6"></div>
+					<li id="paragraph-<?php the_title(); ?>" class="pure-g paragraph">
 		        		
-	        		</div>
+		        		<div class="pure-u-1-12 paragraph-num system"><a href="">#<?php the_title(); ?></a></div>
+		        		<div class="pure-u-1-6"></div>
+		        		
+		        		<p class="pure-u-5-12 hyphenate"><?php echo do_shortcode( str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ) ); ?></p>
+		
+		        		<div class="pure-u-1-4 collection-count system" title="Published in <?php 
+		        		
+		        			$publishedCount = count(get_the_tags());
+		        		
+							echo $publishedCount." edition";
+		        		
+		        			if($publishedCount > 1)
+		        				echo "s";
+		        		
+		        		?>.">(<?php echo $publishedCount;?>x)</div>
 	
-	        	</li>
+		        		<ul class="pure-u-1-12 more system">
+			        		<?php if($edition === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
+			        		<li class="share"><span>&infin; </span><a href="">SHARE</a></li>
+		        		</ul>
+	
+		        		<div class="link">
+		        		
+		        			<div class="pure-u-1-6"></div>
+		        			<div class="pure-u-2-3 separator"></div>
+		        			<div class="pure-u-1-6"></div>
+	
+		        			<div class="pure-u-1-4"></div>
+			        		<div class="pure-u-1-2 content"><h2>Link to paragraph #<?php the_title(); ?></h2><form><input type="text" value="http://www.postdigitalreader.com/reactive-environments/?paragraph=3&edition=XXXXXXXX"></form></div>
+		        			<div class="pure-u-1-4"></div>
+	
+		        			<div class="pure-u-1-6"></div>
+		        			<div class="pure-u-2-3 separator"></div>
+		        			<div class="pure-u-1-6"></div>
+			        		
+		        		</div>
+		
+		        	</li>
 
 <?php wp_reset_postdata(); ?>
 	        	

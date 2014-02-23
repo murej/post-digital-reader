@@ -24,7 +24,7 @@
 ?>
         	<li id="ch-<?php echo $chapter->cat_ID; ?>" class="pure-g chapter<?php if(!$checkForPosts) { echo " empty"; } ?>">
 
-<?php 	if($checkForPosts) { ?>
+<?php 	if($checkForPosts || $edition === "-1") { ?>
 				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapter->cat_ID)); ?>"> 
 <?php 	} ?>
 
@@ -38,7 +38,7 @@
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 separator"></div>
 
-<?php 	if($checkForPosts) { ?>
+<?php 	if($checkForPosts || $edition === "-1") { ?>
 				</a>
 <?php 	} ?>
 
@@ -88,7 +88,7 @@
 					<form method="get" action="<?php bloginfo('url'); ?>">
 					
 						<input type="hidden" name="edition" value="-1">
-						<button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>View collected</button>
+						<button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection']) || $edition === '-1') { ?> disabled <?php } ?>>View collected</button>
 					</form>
 					
 				</div>

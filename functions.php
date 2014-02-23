@@ -17,6 +17,97 @@ function get_paragraphIDs($cookieData) {
 	return json_decode( urldecode( $cookieData ) );
 }
 
+// Add [reference-X] shortcode
+function add_reference_to_post( $atts ) {
+
+	global $post;
+
+	extract( shortcode_atts( array(
+		'id'	 => '',
+		'postID' => $post->ID
+	), $atts));
+		
+	//get custom field array
+	$data = get_post_meta($postID, "reference-".$id, false);
+	
+	$return = '<sup><a href="'.$data[0]["link"].'" class="ref-link system" target="_blank">[&rarr;]</a></sup>';
+	
+	if( !empty($data[0]["quote"]) ) {
+		$return = '<q>'.$data[0]["quote"].'</q>'.$return;
+	}
+	
+	return $return;
+}
+add_shortcode( 'reference', 'add_reference_to_post' );
+
+/*
+// this happens when WP Import All creates a post
+add_action('pmxi_saved_post', 'post_saved', 10, 1);
+ 
+function post_saved($id) {
+
+	$references = [];
+
+	// get post content
+	$content = get_post_field('post_content', $id);
+	
+	// try to find first reference to import
+	$start = strpos($content, "[import-reference");
+	
+	// as long as there are references to import
+	while( $start !== false ) {
+		
+		// find end of it
+		$end = strpos($content, "[/import-reference]", $start)+19;
+
+		// get whole shortcode
+		$shortcode = substr($content, $start, ($end-$start));
+		
+		// parse it
+		$references[] = json_decode( do_shortcode($shortcode) );
+		
+		// prepare it to be saved
+		// = array( "link" => $atts["link"], "quote" => $atts["quote"] );
+		
+		// remove it from content
+		$content = str_replace($shortcode, "", $content);
+		
+		// try to find next reference
+		$start = strpos($content, "[import-reference");
+
+	}
+
+	// add each reference as a custom field array
+	foreach($references as $i => $ref) {
+		add_post_meta($id, 'reference-'.($i+1), $ref, true);
+	}
+
+	$content = trim($content);
+
+	// update post with removed links
+	$my_post = array(
+		'ID'           => $id,
+		'post_content' => $content
+	);
+	wp_update_post( $my_post );
+
+}
+// Add Shortcode
+function import_reference( $atts , $content = null ) {
+
+	// Attributes
+	extract( shortcode_atts(
+		array(
+			'link' => '',
+		), $atts )
+	);
+		
+	return '{ "link" : "'.$link.'", "quote" : "'.$content.'" }';
+}
+add_shortcode( 'import-reference', 'import_reference' );
+*/
+
+
 function generate_PDF($edition, $chapters) {
 
 	include('mpdf/mpdf.php');
@@ -78,12 +169,12 @@ function generate_PDF($edition, $chapters) {
 		// if my collection
 		if( $edition == "-1" ) {
 				
-			$queryParams = array( 'category__in' => array( $chapter->term_id ), 'post__in' => $paragraphIDs );
+			$queryParams = array( 'nopaging' => true, 'category__in' => array( $chapter->term_id ), 'post__in' => $paragraphIDs );
 			$content = get_posts($queryParams);
 		}
 		// if edition
 		else {
-			$content = get_posts('tag='.$edition.'&cat='.$chapter->term_id);
+			$content = get_posts('nopaging=true&tag='.$edition.'&cat='.$chapter->term_id);
 		}
 				
 		if(!empty($content)) {
@@ -94,7 +185,7 @@ function generate_PDF($edition, $chapters) {
 
 			foreach($content as $paragraph) {
 			
-				$output = str_replace("</p>", "<span> #". $paragraph->ID ."</span></p>", $paragraph->post_content);
+				$output = str_replace("</p>", "<span> #". $paragraph->post_title ."</span></p>", do_shortcode($paragraph->post_content));
 			
 				$mpdf->WriteHTML($output,2);
 			}
@@ -113,6 +204,117 @@ function generate_PDF($edition, $chapters) {
 	$mpdf->Output("Post-digital Reader - ".$editionName.".pdf","I");
 	exit;
 }
+
+function importJSON() {
+	
+	$allPosts = json_decode( file_get_contents( content_url() . "/book.json" ) );
+	
+	$chapters = array(
+	
+		1 => "Reactive environments",
+		2 => "Language in/as any form",
+		3 => "Recontextualisation",
+		4 => "Focus",
+		5 => "Ambiguity",
+		6 => "Uniqueness and hybridity of media"
+	
+	);
+
+	removeMyPosts();
+		
+	foreach($allPosts as $par) {
+
+		$postCount++;
+
+		$checkExisting = get_page_by_title( $par->id, OBJECT, 'post' );
+
+		$postData = array(
+			//'ID'             => [ <post id> ] // Are you updating an existing post?
+			'post_content'   => $par->content, // The full text of the post.
+			//'post_name'      => [ <string> ] // The name (slug) for your post
+			'post_title'     => $par->id, // The title of your post.
+			'post_status'    => 'publish', // Default 'draft'.
+			//'post_type'      => [ 'post' | 'page' | 'link' | 'nav_menu_item' | custom post type ] // Default 'post'.
+			'post_author'    => 1, // The user ID number of the author. Default is the current user ID.
+			'ping_status'    => 'closed', // Pingbacks or trackbacks allowed. Default is the option 'default_ping_status'.
+			//'post_parent'    => [ <post ID> ] // Sets the parent of the new post, if any. Default 0.
+			//'menu_order'     => [ <order> ] // If new post is a page, sets the order in which it should appear in supported menus. Default 0.
+			//'to_ping'        => // Space or carriage return-separated list of URLs to ping. Default empty string.
+			//'pinged'         => // Space or carriage return-separated list of URLs that have been pinged. Default empty string.
+			//'post_password'  => [ <string> ] // Password for post, if any. Default empty string.
+			//'guid'           => // Skip this and let Wordpress handle it, usually.
+			//'post_content_filtered' => // Skip this and let Wordpress handle it, usually.
+			//'post_excerpt'   => [ <string> ] // For all your post excerpt needs.
+			//'post_date'      => [ Y-m-d H:i:s ] // The time post was made.
+			//'post_date_gmt'  => [ Y-m-d H:i:s ] // The time post was made, in GMT.
+			'comment_status' => 'closed', // Default is the option 'default_comment_status', or 'closed'.
+			'post_category'  => array( get_cat_ID( $chapters[$par->chapter] ) ), // Default empty.
+			'tags_input'     => 'original' // Default empty.
+			//'tax_input'      => [ array( <taxonomy> => <array | string> ) ] // For custom taxonomies. Default empty.
+			//'page_template'  => [ <string> ] // Default empty.
+		);
+		
+		// iterate through references
+		foreach( $par->references as $ref ) {
+		
+			$references[] = array(
+				"link" => $ref->link,
+				"quote" => $ref->quote
+			);
+		}	
+		
+		// insert post
+		$postID = wp_insert_post( $postData );
+
+		// if failed at one
+		if( $postID === 0 ) { echo "ERROR POSTING"; exit; }
+
+		// add each reference as a custom field array
+		foreach($references as $i => $ref) {
+			add_post_meta($postID, 'reference-'.($i+1), $ref, true);
+		}
+
+		// clear reference array
+		$references = [];
+		
+	}
+	
+	echo "IMPORTED ".$postCount." POSTS.";	
+	exit;
+}
+
+function removeMyPosts() {
+
+	$posts = get_posts("author=1&numberposts=-1");
+	
+	foreach($posts as $post) {
+		$postCount++;
+	
+		$return = wp_delete_post($post->ID, true);
+		
+		if($return === false) {
+			echo "ERROR DELETING";
+			exit;
+		}
+	}
+	
+	echo "DELETED ".$postCount." ENTRIES.\n\n";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ?>

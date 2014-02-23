@@ -1,5 +1,7 @@
 <?php
 
+	//importJSON();
+
 	global $edition;
 	global $allEditions;
 	global $chapters;
@@ -15,10 +17,14 @@
 	
 		generate_PDF($_GET['edition'], $chapters);
 	}
-	else if( $_GET["edition"] === "-1" ) {
+	else if( $_GET["edition"] === "-1" && isset($_COOKIE["myCollection"]) ) {
 	
 		$edition = "-1";
 		$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
+	}
+	else if( $_GET["edition"] === "-1" && !isset($_COOKIE["myCollection"]) ) {
+	
+		header("Location: ".get_bloginfo("url"));
 	}
 	else {
 
