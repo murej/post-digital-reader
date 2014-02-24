@@ -1,5 +1,64 @@
 <?php
 
+//add extra fields to category edit form hook
+add_action ( 'edit_tag_form_fields', 'extra_tag_fields');
+
+//add extra fields to category edit form callback function
+function extra_tag_fields( $tag ) {    //check for existing featured ID
+    $t_id = $tag->term_id;
+    $tag_meta = get_option( "post_tag_$t_id");
+?>
+
+<tr class="form-field">
+	<th scope="row" valign="top"><label for="author"><?php _e('Author'); ?></label></th>
+	<td>
+		<input type="text" name="tag_meta[author]" id="tag_meta[author]" size="25" style="width:60%;" value="<?php echo $tag_meta['author'] ? $tag_meta['author'] : ''; ?>">
+	</td>
+</tr>
+<tr class="form-field">
+	<th scope="row" valign="top"><label for="email"><?php _e('E-mail'); ?></label></th>
+	<td>
+		<input type="text" name="tag_meta[email]" id="tag_meta[email]" size="25" style="width:60%;" value="<?php echo $tag_meta['email'] ? $tag_meta['email'] : ''; ?>">
+	</td>
+</tr>
+<tr class="form-field">
+	<th scope="row" valign="top"><label for="sort"><?php _e('Sort order string'); ?></label></th>
+	<td>
+		<input type="text" name="tag_meta[sort]" id="tag_meta[sort]" size="25" style="width:60%;" value="<?php echo $tag_meta['sort'] ? $tag_meta['sort'] : ''; ?>">
+	</td>
+</tr>
+<tr class="form-field">
+	<th scope="row" valign="top"><label for="timestamp"><?php _e('Timestamp'); ?></label></th>
+	<td>
+		<input type="text" name="tag_meta[timestamp]" id="tag_meta[timestamp]" size="25" style="width:60%;" value="<?php echo $tag_meta['timestamp'] ? $tag_meta['timestamp'] : ''; ?>">
+	</td>
+</tr>
+<?php
+}
+
+// save extra post_tag extra fields hook
+add_action ( 'edited_post_tag', 'save_extra_post_tag_fields');
+//add_action ( 'create_post_tag', 'save_extra_post_tag_fields');
+
+  // save extra post_tag extra fields callback function
+function save_extra_post_tag_fields( $term_id, $data ) {
+
+	if(!isset($data)) { $data = $_POST['tag_meta']; }
+
+    if ( isset($data) ) {
+        $t_id = $term_id;
+        $tag_meta = get_option( "post_tag_$t_id" );
+        $tag_keys = array_keys($data);
+            foreach ($tag_keys as $key){
+            if (isset($data[$key])){
+                $tag_meta[$key] = $data[$key];
+            }
+        }
+        //save the option array
+        update_option( "post_tag_$t_id", $tag_meta );
+    }
+}
+
 function get_edition_URL($parameter, $url) {
 
 	return add_query_arg( array("edition" => $parameter), $url );
@@ -14,7 +73,15 @@ function set_edition($parameter, $url) {
 }
 
 function get_paragraphIDs($cookieData) {
-	return json_decode( urldecode( $cookieData ) );
+
+	$paragraphTitles = json_decode( urldecode( $cookieData ) );
+	$paragraphIDs = [];
+
+	foreach( $paragraphTitles as $title ) {
+		$paragraphIDs[] =  get_page_by_title( $title, OBJECT, 'post' )->ID;
+	}
+
+	return $paragraphIDs;
 }
 
 // Add [reference-X] shortcode
@@ -22,14 +89,16 @@ function add_reference_to_post( $atts ) {
 
 	global $post;
 
-	extract( shortcode_atts( array(
-		'id'	 => '',
-		'postID' => $post->ID
-	), $atts));
-		
-	//get custom field array
-	$data = get_post_meta($postID, "reference-".$id, false);
+	extract( shortcode_atts(
+		array(
+			'id' => '',
+			'post_id' => $post->ID,
+		), $atts )
+	);
 	
+	//get custom field array
+	$data = get_post_meta($post_id, "reference-".$id, false);
+		
 	$return = '<sup><a href="'.$data[0]["link"].'" class="ref-link system" target="_blank">[&rarr;]</a></sup>';
 	
 	if( !empty($data[0]["quote"]) ) {
@@ -153,7 +222,7 @@ function generate_PDF($edition, $chapters) {
 	if( $edition == "-1" ) {
 		$editionName = "My Collection";
 		// write info
-		$mpdf->WriteHTML('<div id="edition"><h3 class="title">'.$editionName.'</h3><p class="info system">on '.date('d F Y').'</p><p class="link">'.get_bloginfo('url').'/?edition='.$edition.'</p></div>');
+		$mpdf->WriteHTML('<div id="edition"><h3 class="title">'.$editionName.'</h3><p class="info system">'.date('d F Y').'</p></div>');
 		$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
 	}
 	// if edition
@@ -170,23 +239,36 @@ function generate_PDF($edition, $chapters) {
 		if( $edition == "-1" ) {
 				
 			$queryParams = array( 'nopaging' => true, 'category__in' => array( $chapter->term_id ), 'post__in' => $paragraphIDs );
-			$content = get_posts($queryParams);
+			$book = get_posts($queryParams);
 		}
 		// if edition
 		else {
-			$content = get_posts('nopaging=true&tag='.$edition.'&cat='.$chapter->term_id);
+			$book = get_posts('nopaging=true&tag='.$edition.'&cat='.$chapter->term_id);
 		}
-				
-		if(!empty($content)) {
+		
+		if(!empty($book)) {
 
 			$mpdf->AddPage();
 			$mpdf->setFooter($footer);
 			$mpdf->WriteHTML('<h3>Design for</h3><h2>'.$chapter->name.'</h2>',2);
 
-			foreach($content as $paragraph) {
-			
-				$output = str_replace("</p>", "<span> #". $paragraph->post_title ."</span></p>", do_shortcode($paragraph->post_content));
-			
+			foreach($book as $paragraph) {
+				
+				// get content
+				$output = $paragraph->post_content;
+				// insert current postID to shortcodes
+				$output = str_replace(']', ' post_id='.$paragraph->ID.']', $output);
+				// add paragraph number at the end
+				$output = str_replace("</p>", "<span> #". $paragraph->post_title ."</span></p>", $output );
+				// execute shortcodes
+				$output = do_shortcode( $output );
+				// add quotation marks (fallback for unsupported CSS)
+				$output = str_replace('<q>', '<q>&ldquo;', $output);
+				$output = str_replace('</q>', '&rdquo;</q>', $output);
+				
+				//var_dump( str_replace(']', ' postID="'.$paragraph->ID.'"]', $paragraph->post_content) );
+				//exit;
+				
 				$mpdf->WriteHTML($output,2);
 			}
 		}
@@ -204,6 +286,53 @@ function generate_PDF($edition, $chapters) {
 	$mpdf->Output("Post-digital Reader - ".$editionName.".pdf","I");
 	exit;
 }
+
+
+
+function publish() {
+	
+	// get the submitted form
+	ob_start();
+	require_once($_POST["rootpath"]);
+		
+	$data["editionTitle"] = $_POST["editionTitle"];
+	$data["author"] = $_POST["author"];
+	$data["email"] = $_POST["email"];
+	$data["sort"] = $_COOKIE["myCollection"];
+	$data["timestamp"] = time();
+	$path = $_POST["rootpath"];
+	$nonce = $_POST["_wpnonce"];
+	$referer = $_POST["_wp_http_referer"];
+
+	$paragraphIDs = get_paragraphIDs($_COOKIE["myCollection"]);
+	
+	//Load WordPress
+	require($path);
+	
+	//Verify the form fields
+	if (! wp_verify_nonce($nonce) ) die('Security check'); 
+	
+		foreach( $paragraphIDs as $parID ) {
+			wp_set_post_tags($parID, $data["editionTitle"], true);
+		}
+		
+		$edition = get_term_by('name', $data["editionTitle"], 'post_tag');
+		save_extra_post_tag_fields( $edition->term_id, $data);
+	
+	// remove cookie
+	if(isset($_COOKIE["myCollection"])) {
+		unset( $_COOKIE["myCollection"] );
+		setcookie("myCollection", null, time()-3600, "/");
+	}
+	
+	header("Location: " . bloginfo('url') . "?edition=" . $edition->slug);
+	
+}
+
+
+
+
+/* BATCH IMPORTING AND DELETING CONTENT */
 
 function importJSON() {
 	
@@ -263,16 +392,34 @@ function importJSON() {
 			);
 		}	
 		
-		// insert post
-		$postID = wp_insert_post( $postData );
+		// TODO: if new post
+		
+			// insert post
+			$postID = wp_insert_post( $postData );
+	
+			// if failed at one
+			if( $postID === 0 ) { echo "ERROR POSTING"; exit; }
+	
+			// add each reference as a custom field array
+			foreach($references as $i => $ref) {
+				add_post_meta($postID, 'reference-'.($i+1), $ref, true);
+			}
 
-		// if failed at one
-		if( $postID === 0 ) { echo "ERROR POSTING"; exit; }
+		// TODO: if existing post
+			
+/*
+			// insert post
+			$postID = wp_update_post( $postData );
+	
+			// if failed at one
+			if( $postID === 0 ) { echo "ERROR POSTING"; exit; }
+	
+			// add each reference as a custom field array
+			foreach($references as $i => $ref) {
+				update_post_meta($postID, 'reference-'.($i+1), $ref, true);
+			}
+*/
 
-		// add each reference as a custom field array
-		foreach($references as $i => $ref) {
-			add_post_meta($postID, 'reference-'.($i+1), $ref, true);
-		}
 
 		// clear reference array
 		$references = [];

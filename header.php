@@ -13,21 +13,30 @@
 	
 	$allEditions = get_tags('exclude='.get_term_by('slug','original','post_tag')->term_id);
 
+	// if PDF requested
 	if($_GET['generatePDF']) {
 	
 		generate_PDF($_GET['edition'], $chapters);
 	}
+	// if publish requested
+	else if($_POST['publish']) {
+	
+		publish();
+	}
+	// if my collection requested with already collected items
 	else if( $_GET["edition"] === "-1" && isset($_COOKIE["myCollection"]) ) {
 	
 		$edition = "-1";
 		$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
 	}
+	// if my collection requested with nothing collected
 	else if( $_GET["edition"] === "-1" && !isset($_COOKIE["myCollection"]) ) {
 	
 		header("Location: ".get_bloginfo("url"));
 	}
 	else {
-
+		
+		// try to get edition
 		$edition = get_term_by('slug', $_GET["edition"], 'post_tag');
 	
 		// show original edition if there is no edition set and it was not explicitly cleared
@@ -104,7 +113,7 @@
 				
 			<ul id="edition-options" class="system">
 				<li><a href="">publish</a></li>
-				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>">print</a></li>
+				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a></li>
 				<li><a href="#change">change</a></li>
 				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li>
 			</ul>
@@ -118,7 +127,7 @@
 				
 			<ul id="edition-options" class="system">
 				<?php if($edition->slug !== "original") { ?><li><a href="">like</a></li><?php } ?>
-				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>">print</a></li>
+				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a></li>
 				<li><a href="#change">change</a></li>
 				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li>
 			</ul>
@@ -139,7 +148,7 @@
 		<li class="pure-u-1-6"></li>
 		<li class="pure-u-1-12">
 			<h3 id="toc">
-				<a href="<?php if($edition) { echo add_query_arg( array("edition" => $_GET["edition"]), bloginfo('url')); } else { echo bloginfo('url'); } ?>">
+				<a href="<?php if($edition) { echo add_query_arg( array("edition" => $_GET["edition"]), bloginfo('url')); } else { echo bloginfo('url'); } ?>#ch-<?php echo $chapters[0]->term_id; ?>">
 					<span class="system">&equiv; </span>TOC
 				</a>
 			</h3>
@@ -169,10 +178,25 @@
 		<div class="pure-u-1-12"></div>
         
 		<ul id="list-all" class="pure-u-5-12 list">
-<?php 	foreach( $allEditions as $oneEdition ) { ?>
+<?php 	foreach( $allEditions as $oneEdition ) { 
+			
+			$data = get_option('post_tag_'.$oneEdition->term_id);
+						
+			if(!empty($data["author"])) {
+				$author = $data["author"];
+			}
+			else {
+				$author = "Anonymous";
+			}
+			
+			if(!empty($data["email"])) {
+				$author = '<a href="mailto:'.$data["email"].'">'.$author.'</a>';
+			}
+	
+?>
 			<li id="edition-<?php echo $oneEdition->term_id; ?>">
 				<h2><a href="<?php echo get_edition_URL($oneEdition->slug, get_bloginfo('url')); ?>"><?php echo $oneEdition->name; ?></a></h2>
-				<p class="system">by <a href="">Craig McDonald</a> on March 12, 2014</p>
+				<p class="system">by <?php echo $author; ?> on <?php echo date('d F Y', $data["timestamp"] ); ?></p>
 			</li>
 <?php	} 
 ?>		</ul>

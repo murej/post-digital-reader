@@ -31,20 +31,23 @@
         <ul id="publish" class="pure-g">
 	        <li class="pure-u-1-4"></li>
 	        <li class="pure-u-1-4">		        
-        		<form method="post" action="<?php bloginfo('template_url'); ?>/publish.php">
-        			
+        		<form method="post" action="<?php bloginfo('url'); ?>">
+
+					<input type="hidden" value="1" name="publish">
+      			
 					<input type="hidden" value="<?php echo str_replace('/wp-content/themes', '', get_theme_root()); ?>/wp-blog-header.php" name="rootpath">
 					<?php wp_nonce_field(); ?>
+
 					
 		        	<input class="title" type="text" placeholder="Click to name your edition" required name="editionTitle">
-		        	<input type="text" placeholder="Enter your name (optional)" name="name">
+		        	<input type="text" placeholder="Enter your name (optional)" name="author">
 		        	<input type="email" placeholder="Enter your contact e-mail (optional)" name="email">
 					<button type="submit" class="system">Publish as a new edition</button>
 		        </form>
 	        </li>
 	        <li class="pure-u-1-12"></li>
 	        <li class="pure-u-1-6">
-				<form method="get" action="<?php bloginfo('url'); ?>">
+				<form method="get" action="<?php strtok("http://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"],'?'); ?>">
 					<input type="hidden" name="edition" value="-1">
 					<button type="submit" class="view system">View</button>
 				</form>
@@ -93,7 +96,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        		
 		        		<p class="pure-u-5-12 hyphenate"><?php echo do_shortcode( str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ) ); ?></p>
 		
-		        		<div class="pure-u-1-4 collection-count system" title="Published in <?php 
+		        		<div class="pure-u-1-4 collection-count"><span class="system" title="Published in <?php 
 		        		
 		        			$publishedCount = count(get_the_tags());
 		        		
@@ -102,7 +105,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        			if($publishedCount > 1)
 		        				echo "s";
 		        		
-		        		?>.">(<?php echo $publishedCount;?>x)</div>
+		        		?>.">(<?php echo $publishedCount;?>x)<span></div>
 	
 		        		<ul class="pure-u-1-12 more system">
 			        		<?php if($edition === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>

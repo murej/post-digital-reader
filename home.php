@@ -34,9 +34,6 @@
 	        			<h2>Design for</h2>
 	        			<h1><?php echo $chapter->name; ?></h1>
 	        		</div>
-	        		<div class="pure-u-1-4"></div>
-	        		<div class="pure-u-1-4"></div>
-	        		<div class="pure-u-1-2 separator"></div>
 
 <?php 	if($checkForPosts || $edition === "-1") { ?>
 				</a>
@@ -50,6 +47,10 @@
 ?>
         	
         	<li id="subscribe" class="pure-g action">
+
+	        	<div class="pure-u-1-4"></div>
+	        	<div class="pure-u-1-2 separator"></div>
+	        	<div class="pure-u-1-4"></div>
         	
         		<div class="pure-u-1-4"></div>
 				<div class="pure-u-1-2">        		
@@ -84,13 +85,18 @@
 				<div class="pure-u-1-4"></div>
 				<div class="pure-u-1-4"></div>
 				<div class="pure-u-1-4 padded">
-	        		
+<?php if($edition === "-1") { ?>
 					<form method="get" action="<?php bloginfo('url'); ?>">
-					
 						<input type="hidden" name="edition" value="-1">
-						<button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection']) || $edition === '-1') { ?> disabled <?php } ?>>View collected</button>
+						<input type="hidden" name="generatePDF" value="1">
+						<button type="submit" class="system light">Print collected</button>
 					</form>
-					
+<?php } else { ?>	        		
+					<form method="get" action="<?php bloginfo('url'); ?>">
+						<input type="hidden" name="edition" value="-1">
+						<button type="submit" class="system light"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>View collected</button>
+					</form>
+<?php } ?>	        		
 				</div>
 				
 				<div class="pure-u-1-4">

@@ -200,6 +200,12 @@ function getUrlQueryParameter(name) {
     return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
+function moveElement(array, fromIndex, toIndex) {
+	array.splice(toIndex, 0, array.splice(fromIndex, 1)[0] );
+	return array;
+} 
+
+
 function resizeRibbon() {
 	var ribbonWidth = $("#collector div").width();
 	$("#collector span").css("border-left-width",(ribbonWidth/16/2)+"em");
@@ -449,6 +455,48 @@ function changeHash(hash) {
 }
 */
 
+function updateSortOrder(movedParagraph, start_pos, end_pos) {
+	
+	// get paragraphIDs from cookie
+	var paragraphIDs = getCollection();
+	
+	// get moving paragraph ID
+	var parID = movedParagraph.attr("id").replace( /^\D+/g, '');
+	var parPos = $.inArray(parID, paragraphIDs);
+
+	// get point of reference ID
+	var refID = movedParagraph.next().attr("id");
+	
+	// if its the last paragraph
+	if( refID === undefined ) {
+		// move to the end of paragraphIDs
+		moveElement(paragraphIDs, parPos, paragraphIDs.length-1);
+	}
+	// if not
+	else {
+	
+		// extract reference ID
+		refID = refID.replace( /^\D+/g, '');
+		
+		// find point of reference in paragraphIDs
+		var refPos = $.inArray(refID, paragraphIDs);
+		
+		// if moved down
+		if( start_pos < end_pos ) {
+			// change sort order
+			moveElement(paragraphIDs, parPos, refPos-1);
+		}
+		// if moved up
+		else {
+			// change sort order
+			moveElement(paragraphIDs, parPos, refPos);
+		}
+	}
+	
+	// save changes back to cookie
+	saveCollection(paragraphIDs);
+}
+
 $(document).ready(function() {
 
 	var allParagraphNum;
@@ -461,7 +509,9 @@ $(document).ready(function() {
 	updateCollector( getCollection().length);
 	$("div#edition-selector").tabs();
 	allParagraphNum = $("ul#wrapper li p").length;
+	
 	setParagraphNum(0, allParagraphNum);
+	
     $( "li#content ul.wrapper" ).sortable({
         start: function(event, ui) {
             var start_pos = ui.item.index();
@@ -470,11 +520,13 @@ $(document).ready(function() {
         update: function(event, ui) {
             var start_pos = ui.item.data('start_pos');
             var end_pos = $(ui.item).index();
-            alert(start_pos + ' -> ' + end_pos);
+            //alert(start_pos + ' -> ' + end_pos);
+            updateSortOrder(ui.item, start_pos, end_pos);
         },
 		axis: "y",
 		disabled: true
 	});
+	
     $("textarea").autosize();
     Hyphenator.run();
 	/**************/

@@ -507,14 +507,24 @@ ul#wrapper {
 			width: 100%;
 		}
 		div.title {
-			margin-top: -4.5em;
+			margin: -4.5em 0 0 0;
 		}
 		
 		div.separator {
 			margin: 2.25em 0 12em 0;
 		}
 		
-		padding: 0 0 1.5em 0;
+		padding: 0 0 9em 0;
+	}
+	
+	li.chapter {
+		
+		a:hover {
+		
+			h1 {
+				text-decoration: underline;
+			}
+		}
 	}
 
 	li.chapter.empty {
@@ -566,7 +576,7 @@ ul#wrapper {
 			}
 		}
 		
-		div.collection-count {
+		div.collection-count span {
 			text-transform: none;
 			opacity: 0.25;
 			cursor: help;
@@ -689,13 +699,13 @@ ul#wrapper {
 			padding-right: 0;
 		}
 		p {
-			margin: 0 0 12em 0;
+			margin: 0 0 6em 0;
 		}
 	}
 	
 	li#publish {
 	
-		margin: 11em 0 12em 0;
+		margin: 1em 0 12em 0;
 		
 		div#collector {
 			
@@ -813,6 +823,7 @@ div#dimmer {
 .separator {
 	height: 0;
 	border-bottom: 0.125em solid $primary-color;
+	margin: 6em 0 12em 0;
 }
 
 button {
