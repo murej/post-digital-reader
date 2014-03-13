@@ -7,18 +7,28 @@
 	// query chapter (category) and filter paragraphs by edition (tag)
 	$queryParams = array( 
 	
-		'orderby' => 'title',
+		'orderby' => 'date',
 		'order' => 'ASC',
 		'nopaging' => true,
 		'category__in' => array( $currentChapterID )
-	
 	);
 	
-	if($edition === "-1") { $queryParams['post__in'] = $paragraphIDs; $queryParams['orderby'] = 'post__in'; }
-	else if($edition) { $queryParams['tag_id'] = $edition->term_id; }
-		
+	// if edition is set (even my collection)
+	if($edition) {
+	
+		$queryParams['post__in'] = $paragraphIDs;
+		$queryParams['orderby'] = 'post__in';
+	}
+	
+	// if edition is set, but is not my collection
+	if($edition !== "-1") {
+		$queryParams['tag_id'] = $edition->term_id;
+	}
+	
+	// query posts	
 	$the_query = new WP_Query($queryParams);
 	
+	// 
 	foreach($chapters as $key => $chapter) {
 		
 		if( $currentChapterID == $chapter->cat_ID ) {
@@ -27,43 +37,11 @@
 	}
 	
 ?>
-
-        <ul id="publish" class="pure-g">
-	        <li class="pure-u-1-4"></li>
-	        <li class="pure-u-1-4">		        
-        		<form method="post" action="<?php bloginfo('url'); ?>">
-
-					<input type="hidden" value="1" name="publish">
-      			
-					<input type="hidden" value="<?php echo str_replace('/wp-content/themes', '', get_theme_root()); ?>/wp-blog-header.php" name="rootpath">
-					<?php wp_nonce_field(); ?>
-
-					
-		        	<input class="title" type="text" placeholder="Click to name your edition" required name="editionTitle">
-		        	<input type="text" placeholder="Enter your name (optional)" name="author">
-		        	<input type="email" placeholder="Enter your contact e-mail (optional)" name="email">
-					<button type="submit" class="system">Publish as a new edition</button>
-		        </form>
-	        </li>
-	        <li class="pure-u-1-12"></li>
-	        <li class="pure-u-1-6">
-				<form method="get" action="<?php strtok("http://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"],'?'); ?>">
-					<input type="hidden" name="edition" value="-1">
-					<button type="submit" class="view system">View</button>
-				</form>
-				<button type="submit" class="download system">Download</button>
-				<form action="<?php echo "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
-					<input type="hidden" name="edition" value="<?php echo $_REQUEST['edition']; ?>">
-					<button type="submit" class="system clear">Clear my collection</button>
-				</form>
-	        </li>
-        </ul>
-
         <ul id="wrapper">
         	        
         	<li id="chapter-<?php echo $currentChapterID; ?>" class="pure-g chapter">
         
-        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.gif"></div>
+        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.png"></div>
         		<div class="pure-u-1-4"></div>
         		<div class="pure-u-1-2 title">
         			<h2>Design for</h2>
@@ -110,24 +88,21 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        		<ul class="pure-u-1-12 more system">
 			        		<?php if($edition === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
 			        		<li class="share"><span>&infin; </span><a href="">SHARE</a></li>
+			        		<li class="link"><form><input type="text" value="<?php
+			        			
+			        			$link = get_category_link(  get_the_category()[0]->term_id );
+			        			
+			        			if($edition && $edition != "-1") { 
+				        			$link = add_query_arg( array( "edition" => $edition->slug ), $link );
+			        			}
+			        			
+			        			$link .= "#paragraph-" . get_the_title();
+			        			
+			        			echo $link;
+			        			
+			        		?>"></form></li>
 		        		</ul>
 	
-		        		<div class="link">
-		        		
-		        			<div class="pure-u-1-6"></div>
-		        			<div class="pure-u-2-3 separator"></div>
-		        			<div class="pure-u-1-6"></div>
-	
-		        			<div class="pure-u-1-4"></div>
-			        		<div class="pure-u-1-2 content"><h2>Link to paragraph #<?php the_title(); ?></h2><form><input type="text" value="http://www.postdigitalreader.com/reactive-environments/?paragraph=3&edition=XXXXXXXX"></form></div>
-		        			<div class="pure-u-1-4"></div>
-	
-		        			<div class="pure-u-1-6"></div>
-		        			<div class="pure-u-2-3 separator"></div>
-		        			<div class="pure-u-1-6"></div>
-			        		
-		        		</div>
-		
 		        	</li>
 
 <?php wp_reset_postdata(); ?>
@@ -144,7 +119,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
         		</ul>
 	        
         	</li>
-<?php if( $edition === "-1" ) { ?>    	
+<?php //if( $edition === "-1" ) { ?>    	
         	<li id="add-content" class="pure-g add-content">
         	
         		<ul id="adding-options">
@@ -180,7 +155,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
         	
         	</li>
 
-<?php } ?>
+
         	
 <?php if( $currentChapterKey+1 <= count($chapters)-1  ) { ?>
 
@@ -188,7 +163,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 				
 				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$currentChapterKey+1]->cat_ID)); ?>"> 
 				
-	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.gif" alt="Illustration"></div>
+	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.png" alt="Illustration"></div>
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 title">
 	        			<h2>Design for</h2>

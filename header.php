@@ -26,12 +26,14 @@
 	// if my collection requested with already collected items
 	else if( $_GET["edition"] === "-1" && isset($_COOKIE["myCollection"]) ) {
 	
+		// set edition as my collection
 		$edition = "-1";
 		$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
 	}
 	// if my collection requested with nothing collected
 	else if( $_GET["edition"] === "-1" && !isset($_COOKIE["myCollection"]) ) {
 	
+		// set default edition
 		header("Location: ".get_bloginfo("url"));
 	}
 	else {
@@ -39,6 +41,9 @@
 		// try to get edition
 		$edition = get_term_by('slug', $_GET["edition"], 'post_tag');
 	
+		// get sort order from saved cookie string
+		$paragraphIDs = get_paragraphIDs( get_edition_data( $edition->term_id )["sort"] );
+
 		// show original edition if there is no edition set and it was not explicitly cleared
 		if( $edition === false && !isset( $_COOKIE['clearedEditions'] ) ){
 			set_edition("original", $_SERVER['REQUEST_URI']);		
@@ -88,6 +93,7 @@
 						The <i class="strikethrough serif">form</i> role<br>
 						of books in the<br>
 						digital <i class="strikethrough serif">media</i> age<br>
+						<span class="status">in everlasting beta</span>
 					</h1>
 					
 				</div>
@@ -104,7 +110,7 @@
         
 	<ul id="nav" class="pure-g <?php if( is_home() ) { echo "home"; } ?>">
         
-		<li id="collector" class="pure-u-1-12"><div>0</div><span></span></li>
+		<li id="collector" class="pure-u-1-12"><form method="post" action="<?php bloginfo('url'); ?>#collection-info"><button type="submit"<?php if( is_home() ) { echo " disabled"; } ?>>0</button><span></span></form></li>
 <?php if($edition === "-1") { ?>
 		<li class="pure-u-1-6 viewing system"></li>
 		<li class="pure-u-1-2">
@@ -112,10 +118,10 @@
 			<h3>My collection</h3>
 				
 			<ul id="edition-options" class="system">
-				<li><a href="">publish</a></li>
+				<li><a href="<?php bloginfo('url'); ?>?edition=<?php echo $_REQUEST['edition']; ?>#collection-info">publish</a></li>
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a></li>
 				<li><a href="#change">change</a></li>
-				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li>
+<!-- 				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li> -->
 			</ul>
 				
 		</li>
@@ -129,7 +135,7 @@
 				<?php if($edition->slug !== "original") { ?><li><a href="">like</a></li><?php } ?>
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a></li>
 				<li><a href="#change">change</a></li>
-				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li>
+<!-- 				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li> -->
 			</ul>
 				
 		</li>
@@ -159,7 +165,7 @@
 	<div id="edition-selector" class="pure-g">
 
 		<div class="pure-u-1-4"></div>				
-		<h3 class="pure-u-5-12">Published editions of this book</h3>
+		<h3 class="pure-u-5-12"><!-- Published editions of this book --></h3>
 		<h3 id="close" class="pure-u-1-3"><span>&times;</span></h3>				
 
 		<div class="pure-u-1-4"></div>				
@@ -180,7 +186,7 @@
 		<ul id="list-all" class="pure-u-5-12 list">
 <?php 	foreach( $allEditions as $oneEdition ) { 
 			
-			$data = get_option('post_tag_'.$oneEdition->term_id);
+			$data = get_edition_data($oneEdition->term_id);
 						
 			if(!empty($data["author"])) {
 				$author = $data["author"];
@@ -209,4 +215,3 @@
 		</ul>
 
 	</div>
-	

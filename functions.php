@@ -1,5 +1,23 @@
 <?php
 
+function encodeURI($url) {
+    // http://php.net/manual/en/function.rawurlencode.php
+    // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/encodeURI
+    $unescaped = array(
+        '%2D'=>'-','%5F'=>'_','%2E'=>'.','%21'=>'!', '%7E'=>'~',
+        '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')'
+    );
+    $reserved = array(
+        '%3B'=>';','%2C'=>',','%2F'=>'/','%3F'=>'?','%3A'=>':',
+        '%40'=>'@','%26'=>'&','%3D'=>'=','%2B'=>'+','%24'=>'$'
+    );
+    $score = array(
+        '%23'=>'#'
+    );
+    return strtr(rawurlencode($url), array_merge($reserved,$unescaped,$score));
+
+}
+
 //add extra fields to category edit form hook
 add_action ( 'edit_tag_form_fields', 'extra_tag_fields');
 
@@ -78,7 +96,10 @@ function get_paragraphIDs($cookieData) {
 	$paragraphIDs = [];
 
 	foreach( $paragraphTitles as $title ) {
-		$paragraphIDs[] =  get_page_by_title( $title, OBJECT, 'post' )->ID;
+		
+		if( !is_object($title) ) {
+			$paragraphIDs[] =  get_page_by_title( $title, OBJECT, 'post' )->ID;
+		}
 	}
 
 	return $paragraphIDs;
@@ -177,117 +198,171 @@ add_shortcode( 'import-reference', 'import_reference' );
 */
 
 
-function generate_PDF($edition, $chapters) {
+function generate_PDF($editionSlug, $chapters) {
 
-	include('mpdf/mpdf.php');
-	$stylesheet = file_get_contents(get_bloginfo('template_url')."/css/print.css");
-	$footer = array (
-		'odd' => array (
-			'L' => array (
-				'content' => '{PAGENO}',
-				'font-size' => 12,
-				'font-style' => 'R',
-				'font-family' => 'helvetica',
-				'color'=>'#000000'
-			),
-			'C' => array (
-				'content' => '',
-				'font-size' => 12,
-				'font-style' => 'R',
-				'font-family' => 'helvetica',
-				'color'=>'#000000'
-			),
-			'R' => array (
-				'content' => '',
-				'font-size' => 12,
-				'font-style' => 'R',
-				'font-family' => 'helvetica',
-				'color'=>'#000000'
-			),
-			'line' => 0,
-			),
-		'even' => array ()
-	);
-	
-	
-	
-	// set document		
-	$mpdf = new mPDF('utf-8');
-	$mpdf->WriteHTML($stylesheet,1);
-	
-	// write cover page
-	$mpdf->WriteHTML('<h1><span class="serif">P05T-D16174L</span><br> READER.<br> The <i class="strikethrough serif">form</i> role <br>of books in the <br>digital <i class="strikethrough serif">media</i> age</h1>');
-	
-	// if my collection
-	if( $edition == "-1" ) {
-		$editionName = "My Collection";
-		// write info
-		$mpdf->WriteHTML('<div id="edition"><h3 class="title">'.$editionName.'</h3><p class="info system">'.date('d F Y').'</p></div>');
-		$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
-	}
-	// if edition
-	else {
-		$editionName = get_term_by("slug", $edition, "post_tag")->name;
-		// write info
-		$mpdf->WriteHTML('<div id="edition"><h4 class="system edition">Edition:</h4><h3 class="title">'.$editionName.'</h3><p class="info system">by Jure Martinec on '.date('d F Y').'</p><p class="link">'.get_bloginfo('url').'/?edition='.$edition.'</p></div>');
-	}
-	
-	// go through all chapters
-	foreach($chapters as $chapter) {
+	$pdfPath = "wp-content/editions/".$editionSlug.".pdf";
+	$niceName = "Post-digital Reader (".get_term_by('slug', $editionSlug, 'post_tag')->name.").pdf";
 
+	// IF PDF ALREDY EXISTS
+	if( filesize($pdfPath) !== false ) {
+	
+		// fetch from wp-content
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/pdf');
+		header('Content-Length: ' . filesize($pdfPath));
+		// to open in browser
+		header('Content-Disposition: inline; filename=' . basename($niceName));
+		readfile($pdfPath);
+		
+	// IF PDF NOT YET GENERATED
+	} else {
+
+		include('mpdf/mpdf.php');
+		$stylesheet = file_get_contents(get_bloginfo('template_url')."/css/print.css");
+		$footer = array (
+			'odd' => array (
+				'L' => array (
+					'content' => '{PAGENO}',
+					'font-size' => 12,
+					'font-style' => 'R',
+					'font-family' => 'helvetica',
+					'color'=>'#000000'
+				),
+				'C' => array (
+					'content' => '',
+					'font-size' => 12,
+					'font-style' => 'R',
+					'font-family' => 'helvetica',
+					'color'=>'#000000'
+				),
+				'R' => array (
+					'content' => '',
+					'font-size' => 12,
+					'font-style' => 'R',
+					'font-family' => 'helvetica',
+					'color'=>'#000000'
+				),
+				'line' => 0,
+				),
+			'even' => array ()
+		);
+		
+		$editionData = get_edition_data( get_term_by("slug", $editionSlug, "post_tag")->term_id );
+		
+		$title = $editionData["editionTitle"];
+		$author = $editionData["author"];
+		//$email = $editionData["email"];
+		$sortString = $editionData["sort"];
+		$timestamp = $editionData["timestamp"];
+		
+		if(empty($author)) {
+			
+			$author = "Anonymous";
+		}
+		
+		// set document		
+		$mpdf = new mPDF('utf-8');
+		$mpdf->WriteHTML($stylesheet,1);
+		
+		// write cover page
+		$mpdf->WriteHTML('<h1><span class="serif">P05T-D16174L</span><br> READER.<br> The <i class="strikethrough serif">form</i> role <br>of books in the <br>digital <i class="strikethrough serif">media</i> age</h1>');
+		
 		// if my collection
-		if( $edition == "-1" ) {
-				
-			$queryParams = array( 'nopaging' => true, 'category__in' => array( $chapter->term_id ), 'post__in' => $paragraphIDs );
-			$book = get_posts($queryParams);
+		if( $editionSlug == "-1" ) {
+			// write info
+			$mpdf->WriteHTML('<div id="edition"><h3 class="title">My Collection</h3><p class="info system">'.date('d F Y').'</p></div>');
+			$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
 		}
 		// if edition
 		else {
-			$book = get_posts('nopaging=true&tag='.$edition.'&cat='.$chapter->term_id);
+			// write info
+			$mpdf->WriteHTML('<div id="edition"><h4 class="system edition">Edition:</h4><h3 class="title">'.$title.'</h3><p class="info system">by '.$author.' on '.date('d F Y', $timestamp).'</p><p class="link">'.get_bloginfo('url').'/?edition='.$editionSlug.'</p></div>');
+			$paragraphIDs = get_paragraphIDs( $sortString );
 		}
 		
-		if(!empty($book)) {
-
-			$mpdf->AddPage();
-			$mpdf->setFooter($footer);
-			$mpdf->WriteHTML('<h3>Design for</h3><h2>'.$chapter->name.'</h2>',2);
-
-			foreach($book as $paragraph) {
-				
-				// get content
-				$output = $paragraph->post_content;
-				// insert current postID to shortcodes
-				$output = str_replace(']', ' post_id='.$paragraph->ID.']', $output);
-				// add paragraph number at the end
-				$output = str_replace("</p>", "<span> #". $paragraph->post_title ."</span></p>", $output );
-				// execute shortcodes
-				$output = do_shortcode( $output );
-				// add quotation marks (fallback for unsupported CSS)
-				$output = str_replace('<q>', '<q>&ldquo;', $output);
-				$output = str_replace('</q>', '&rdquo;</q>', $output);
-				
-				//var_dump( str_replace(']', ' postID="'.$paragraph->ID.'"]', $paragraph->post_content) );
-				//exit;
-				
-				$mpdf->WriteHTML($output,2);
+		// go through all chapters
+		foreach($chapters as $chapter) {
+	
+			// if my collection
+			if( $editionSlug === "-1" ) {
+					
+				$queryParams = array(
+					'nopaging' => true,
+					'category__in' => array( $chapter->term_id ),
+					'post__in' => $paragraphIDs,
+					'orderby' => 'post__in'
+				);
+				$book = get_posts($queryParams);
+			}
+			// if edition
+			else {
+			
+				$queryParams = array(
+					'nopaging' => true,
+					'tag' => $editionSlug,
+					'category__in' => array( $chapter->term_id ),
+					'post__in' => $paragraphIDs,
+					'orderby' => 'post__in'
+				);
+				$book = get_posts($queryParams);
+			}
+			
+			// if there is content
+			if(!empty($book)) {
+	
+				$mpdf->AddPage();
+				$mpdf->setFooter($footer);
+				$mpdf->WriteHTML('<h3>Design for</h3><h2>'.$chapter->name.'</h2>',2);
+	
+				foreach($book as $paragraph) {
+					
+					// get content
+					$output = $paragraph->post_content;
+					// insert current postID to shortcodes
+					$output = str_replace(']', ' post_id='.$paragraph->ID.']', $output);
+					// add paragraph number at the end
+					$output = str_replace("</p>", "<span> #". $paragraph->post_title ."</span></p>", $output );
+					// execute shortcodes
+					$output = do_shortcode( $output );
+					// add quotation marks (fallback for unsupported CSS)
+					$output = str_replace('<q>', '<q>&ldquo;', $output);
+					$output = str_replace('</q>', '&rdquo;</q>', $output);
+					// write to PDF					
+					$mpdf->WriteHTML($output,2);
+				}
+			}
+			// if there is no content
+			else {
+	
+				$mpdf->AddPage();
+				$mpdf->setFooter($footer);
+				$mpdf->WriteHTML('<h3>Design for</h3><h2 class="strikethrough">'.$chapter->name.'</h2>',2);
 			}
 		}
-		else {
-
-			$mpdf->AddPage();
-			$mpdf->setFooter($footer);
-			$mpdf->WriteHTML('<h3>Design for</h3><h2 class="strikethrough">'.$chapter->name.'</h2>',2);
-		}
+	
+		// set metadata
+		$mpdf->SetTitle("Post-digital Reader (".$title.")");
+		$mpdf->SetAuthor($author);
+		
+		// if my collection
+		if($editionSlug === "-1") {
+			// show PDF
+			$mpdf->Output($pdfPath,"I");
+			exit;
+		// if a regular edition
+		} else {
+			// save PDF
+			$mpdf->Output($pdfPath,"F");
+			// attempt to show it
+			generate_PDF($editionSlug, $chapters);		
+		}		
 	}
-
-	$mpdf->SetTitle("Post-digital Reader: ".$editionName);
-	//$mpdf->SetAuthor();
-
-	$mpdf->Output("Post-digital Reader - ".$editionName.".pdf","I");
-	exit;
 }
 
-
+function get_edition_data($chapterID) {
+	
+	return get_option('post_tag_'.$chapterID);
+}
 
 function publish() {
 	
@@ -299,10 +374,9 @@ function publish() {
 	$data["author"] = $_POST["author"];
 	$data["email"] = $_POST["email"];
 	$data["sort"] = $_COOKIE["myCollection"];
-	$data["timestamp"] = time();
+	$data["timestamp"] = time(); // TODO: zakaj to posebi, če je tkoaltko shranjen?
 	$path = $_POST["rootpath"];
 	$nonce = $_POST["_wpnonce"];
-	$referer = $_POST["_wp_http_referer"];
 
 	$paragraphIDs = get_paragraphIDs($_COOKIE["myCollection"]);
 	
@@ -312,10 +386,13 @@ function publish() {
 	//Verify the form fields
 	if (! wp_verify_nonce($nonce) ) die('Security check'); 
 	
+		// for each paragraph in edition
 		foreach( $paragraphIDs as $parID ) {
+			// set that edition
 			wp_set_post_tags($parID, $data["editionTitle"], true);
 		}
 		
+		// save edition info
 		$edition = get_term_by('name', $data["editionTitle"], 'post_tag');
 		save_extra_post_tag_fields( $edition->term_id, $data);
 	
@@ -329,10 +406,15 @@ function publish() {
 	
 }
 
-
-
-
-/* BATCH IMPORTING AND DELETING CONTENT */
+/********************************************/
+/*											*/
+/*	BATCH IMPORTING AND DELETING CONTENT	*/
+/*											*/
+/*	Warning: first deletes all your posted	*/
+/*			 content and everything			*/
+/*			 associated with it	(tags etc.)	*/
+/*											*/
+/********************************************/
 
 function importJSON() {
 	
@@ -354,6 +436,7 @@ function importJSON() {
 	foreach($allPosts as $par) {
 
 		$postCount++;
+		$sortArray[] = strval($par->id);
 
 		$checkExisting = get_page_by_title( $par->id, OBJECT, 'post' );
 
@@ -378,7 +461,7 @@ function importJSON() {
 			//'post_date_gmt'  => [ Y-m-d H:i:s ] // The time post was made, in GMT.
 			'comment_status' => 'closed', // Default is the option 'default_comment_status', or 'closed'.
 			'post_category'  => array( get_cat_ID( $chapters[$par->chapter] ) ), // Default empty.
-			'tags_input'     => 'original' // Default empty.
+			'tags_input'     => 'original' //, Default empty.
 			//'tax_input'      => [ array( <taxonomy> => <array | string> ) ] // For custom taxonomies. Default empty.
 			//'page_template'  => [ <string> ] // Default empty.
 		);
@@ -426,7 +509,19 @@ function importJSON() {
 		
 	}
 	
-	echo "IMPORTED ".$postCount." POSTS.";	
+	// save edition info
+	$edition = get_term_by('name', 'original', 'post_tag');
+	$editionData = array(
+		"editionTitle" => "Original",
+		"author" => "Jure Martinec",
+		"email" => "jure.martinec@gmail.com",
+		"sort" => urlencode( json_encode($sortArray) ),
+		"timestamp" => time()
+
+	);
+	save_extra_post_tag_fields($edition->term_id, $editionData);
+	
+	echo "IMPORTED " . $postCount . " POSTS.";	
 	exit;
 }
 
