@@ -1,22 +1,34 @@
 <?php
 
-function encodeURI($url) {
-    // http://php.net/manual/en/function.rawurlencode.php
-    // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/encodeURI
-    $unescaped = array(
-        '%2D'=>'-','%5F'=>'_','%2E'=>'.','%21'=>'!', '%7E'=>'~',
-        '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')'
-    );
-    $reserved = array(
-        '%3B'=>';','%2C'=>',','%2F'=>'/','%3F'=>'?','%3A'=>':',
-        '%40'=>'@','%26'=>'&','%3D'=>'=','%2B'=>'+','%24'=>'$'
-    );
-    $score = array(
-        '%23'=>'#'
-    );
-    return strtr(rawurlencode($url), array_merge($reserved,$unescaped,$score));
+add_action( 'wp_enqueue_scripts', 'enqueue_all_scripts' );
+function enqueue_all_scripts() {
+	
+	// this moves jquery loader to footer
+	//wp_enqueue_script('jquery','/wp-includes/js/jquery/jquery.js','','',true);
 
+	// adds built in dependencies
+	$dependencies = array('jquery','jquery-ui-core','jquery-ui-sortable','jquery-ui-tabs','underscore');
+	
+	// loads main script
+	wp_enqueue_script('main-script', get_bloginfo('template_url').'/js/main.js', $dependencies, '', true );	
+
+	// adds ajax object for ajax requests
+	wp_localize_script( 'main-script', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
 }
+
+// disable admin bar
+remove_action( 'wp_footer', 'wp_admin_bar_render', 1000 );
+function remove_admin_bar_style_frontend() { 
+  echo '<style type="text/css" media="screen">
+  html { margin-top: 0px !important; }
+  * html body { margin-top: 0px !important; }
+  </style>';
+}
+add_filter('wp_head','remove_admin_bar_style_frontend', 99);
+
+
+
+
 
 //add extra fields to category edit form hook
 add_action ( 'edit_tag_form_fields', 'extra_tag_fields');
@@ -77,29 +89,44 @@ function save_extra_post_tag_fields( $term_id, $data ) {
     }
 }
 
+function removeCollection() {
+
+	if(isset($_COOKIE["myCollection"])) {
+
+		unset( $_COOKIE["myCollection"] );
+		setcookie("myCollection", null, time()-3600, "/");
+	}
+}
+
+function updateCollection($paragraphIDTitle) {
+
+	$collection = json_decode( stripslashes($_COOKIE["myCollection"]), true );
+	$collection[] = strval($paragraphIDTitle);
+
+	removeCollection();
+	setcookie("myCollection", json_encode($collection), time()+3650, "/");
+
+}
+
 function get_edition_URL($parameter, $url) {
 
 	return add_query_arg( array("edition" => $parameter), $url );
-	
 }
 
 function set_edition($parameter, $url) {
 	
 	Header("Location: " . get_edition_URL($parameter, $url));
 	exit;
-
 }
 
 function get_paragraphIDs($cookieData) {
 
-	$paragraphTitles = json_decode( urldecode( $cookieData ) );
+	$paragraphIDTitles = json_decode( stripslashes($cookieData) );
 	$paragraphIDs = [];
-
-	foreach( $paragraphTitles as $title ) {
+	
+	foreach( $paragraphIDTitles as $title ) {
 		
-		if( !is_object($title) ) {
-			$paragraphIDs[] =  get_page_by_title( $title, OBJECT, 'post' )->ID;
-		}
+		$paragraphIDs[] = get_page_by_title( $title, OBJECT, 'post' )->ID;
 	}
 
 	return $paragraphIDs;
@@ -129,74 +156,6 @@ function add_reference_to_post( $atts ) {
 	return $return;
 }
 add_shortcode( 'reference', 'add_reference_to_post' );
-
-/*
-// this happens when WP Import All creates a post
-add_action('pmxi_saved_post', 'post_saved', 10, 1);
- 
-function post_saved($id) {
-
-	$references = [];
-
-	// get post content
-	$content = get_post_field('post_content', $id);
-	
-	// try to find first reference to import
-	$start = strpos($content, "[import-reference");
-	
-	// as long as there are references to import
-	while( $start !== false ) {
-		
-		// find end of it
-		$end = strpos($content, "[/import-reference]", $start)+19;
-
-		// get whole shortcode
-		$shortcode = substr($content, $start, ($end-$start));
-		
-		// parse it
-		$references[] = json_decode( do_shortcode($shortcode) );
-		
-		// prepare it to be saved
-		// = array( "link" => $atts["link"], "quote" => $atts["quote"] );
-		
-		// remove it from content
-		$content = str_replace($shortcode, "", $content);
-		
-		// try to find next reference
-		$start = strpos($content, "[import-reference");
-
-	}
-
-	// add each reference as a custom field array
-	foreach($references as $i => $ref) {
-		add_post_meta($id, 'reference-'.($i+1), $ref, true);
-	}
-
-	$content = trim($content);
-
-	// update post with removed links
-	$my_post = array(
-		'ID'           => $id,
-		'post_content' => $content
-	);
-	wp_update_post( $my_post );
-
-}
-// Add Shortcode
-function import_reference( $atts , $content = null ) {
-
-	// Attributes
-	extract( shortcode_atts(
-		array(
-			'link' => '',
-		), $atts )
-	);
-		
-	return '{ "link" : "'.$link.'", "quote" : "'.$content.'" }';
-}
-add_shortcode( 'import-reference', 'import_reference' );
-*/
-
 
 function generate_PDF($editionSlug, $chapters) {
 
@@ -364,6 +323,83 @@ function get_edition_data($chapterID) {
 	return get_option('post_tag_'.$chapterID);
 }
 
+add_action( 'wp_ajax_delete_paragraph', 'delete_paragraph_callback' );
+add_action( 'wp_ajax_nopriv_delete_paragraph', 'delete_paragraph_callback' );
+
+function delete_paragraph_callback() {
+	
+	global $wpdb; // this is how you get access to the database
+
+	$return = wp_delete_post( get_page_by_title($_POST['paragraphID'], OBJECT, 'post')->ID, true );
+	
+	if($return === false) {
+		echo "ERROR DELETING";
+		exit;
+	}
+
+	die(); // this is required to return a proper result
+}
+
+function contribute() {
+
+	//Get the submitted form
+	ob_start();
+	require_once($_POST["rootpath"]);
+	
+	$paragraph = $_POST["paragraph"];
+	$paragraphIDTitle = wp_count_posts('post')+1;	// paragraph IDs are gathered from post titles in order to have them humanly readable 
+	$chapter = $_POST["chapter"];
+	//$edition = $_POST["edition"];
+	
+	$http_referer = $_POST["_wp_http_referer"];
+	$path = $_POST["rootpath"];
+	$nonce = $_POST["_wpnonce"];
+	
+	//Load WordPress
+	require($path);
+	
+	//Verify the form fields
+	if (! wp_verify_nonce($nonce) ) die('Security check'); 
+		
+		// just in case to avoid duplicate titles (hope it works)
+		while( get_page_by_title($paragraphIDTitle, OBJECT, 'post') !== NULL ) {
+			
+			// 
+			$paragraphIDTitle++; //= wp_count_posts('post')+1;
+		}
+		
+		// post Properties
+		$new_post = array(
+			'post_title'	=>	$paragraphIDTitle,
+			'post_content'  =>	$paragraph,
+			'post_category' =>	array($chapter),  // Usable for custom taxonomies too
+			//'tags_input'    => array($edition),
+			'post_status' 	=>	'publish',           // Choose: publish, preview, future, draft, etc.
+			'post_type'		=>	'post',  //'post',page' or use a custom post type if you want to
+			'post_author'	=>	2 //Author ID
+		);
+		
+		//save the new post
+		$pid = wp_insert_post($new_post);
+	     
+	    // Insert Form data into Custom Fields
+	/*
+	    add_post_meta($pid, 'author', $author, true);
+	    add_post_meta($pid, 'author-email', $email, true);
+	    add_post_meta($pid, 'author-website', $site, true);
+	*/
+	
+	if( isset($pid) ) {
+
+		// mark paragraph as collected
+		updateCollection( strval($paragraphIDTitle) );
+		header("Location: http://" . $_SERVER["HTTP_HOST"].$http_referer . "#paragraph-" . $paragraphIDTitle);
+	}
+	else {
+		echo "ERROR SUBMITTING!";
+	}
+}
+
 function publish() {
 	
 	// get the submitted form
@@ -397,11 +433,8 @@ function publish() {
 		save_extra_post_tag_fields( $edition->term_id, $data);
 	
 	// remove cookie
-	if(isset($_COOKIE["myCollection"])) {
-		unset( $_COOKIE["myCollection"] );
-		setcookie("myCollection", null, time()-3600, "/");
-	}
-	
+	removeCollection();
+		
 	header("Location: " . bloginfo('url') . "?edition=" . $edition->slug);
 	
 }
@@ -515,7 +548,7 @@ function importJSON() {
 		"editionTitle" => "Original",
 		"author" => "Jure Martinec",
 		"email" => "jure.martinec@gmail.com",
-		"sort" => urlencode( json_encode($sortArray) ),
+		"sort" => rawurlencode( json_encode($sortArray) ),
 		"timestamp" => time()
 
 	);

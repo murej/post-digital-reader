@@ -18,6 +18,11 @@
 	
 		generate_PDF($_GET['edition'], $chapters);
 	}
+	// if paragraph was written
+	else if($_POST['contribute']) {
+		
+		contribute();
+	}
 	// if publish requested
 	else if($_POST['publish']) {
 	
@@ -69,7 +74,7 @@
             <script src="<?php bloginfo('template_url'); ?>/js/vendor/html5-3.6-respond-1.1.0.min.js"></script>
         <![endif]-->
 
-<?php //wp_head(); ?>
+<?php wp_head(); ?>
 
     </head>
     
