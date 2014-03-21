@@ -6,7 +6,7 @@
         
 				<div class="pure-u-1-4"></div>
 				<div class="pure-u-5-12">
-					<h2>This is <form><input type="text" value="a book" size="14"></form></h2>
+					<h2>This is <span class="what-is" contenteditable>a digital book</span>?</h2>
 					<p class="hyphenate">It's a theoretical exploration of how digital is affecting the reader of books. The writing process formed linear text and resulted in a set of possible design principles for the future (digital) book. This online version flips the traditional form and generates structure in relation to those principles in hope of creating new meaning, alternate interpretations and subsequently new ways of thinking about the role of the future book. Consider this not as a finished frame of work, not as a set of rules nor methods of creation for the ideal book of the future. It’s a starting point for a conversation, with gaps, mistakes and provocations, ready to be dissected, interpreted, filled in and corrected by the reading audience.<p>
 					<p>&ndash; <a href="#author" class="author">Jure Martinec</a></p>
 				</div>
@@ -17,6 +17,7 @@
 	foreach($chapters as $i => $chapter) {
 	
 		$postQuery['category'] = $chapter->cat_ID;
+		$postQuery['nopaging'] = true;
 		if($edition === "-1") { $postQuery['post__in'] = $paragraphIDs; }
 		else if($edition) { $postQuery['tag'] = $_REQUEST['edition']; }
 		$checkForPosts = get_posts($postQuery);
@@ -32,7 +33,7 @@
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 title">
 	        			<h2>Design for</h2>
-	        			<h1><?php echo $chapter->name; ?></h1>
+	        			<h1><?php echo $chapter->name; ?><?php echo '<span class="counter"> ('.count($checkForPosts).')</span>'; ?></h1>
 	        		</div>
 
 <?php 	if($checkForPosts || $edition === "-1") { ?>
@@ -104,12 +105,19 @@
 						<input type="hidden" name="edition" value="<?php echo $_REQUEST['edition']; ?>">
 	        			<button type="submit" class="system">Start collecting</button>
 	        		</form>
-<?php } ?>
-					<form method="get" action="<?php bloginfo('url'); ?>" class="view">
-						<input type="hidden" name="edition" value="-1">
-						<button type="submit" class="system"<?php if(!isset($_COOKIE['myCollection'])) { ?> disabled <?php } ?>>Edit collection</button>
-					</form>
 
+	        		<form action="<?php echo get_category_link( $chapters[0]->term_id ); ?>#writer">
+						<input type="hidden" name="edition" value="<?php echo $_REQUEST['edition']; ?>">
+	        			<button type="submit" class="system" disabled>Write to collection</button>
+	        		</form>
+<?php } ?>
+
+<?php if(isset($_COOKIE['myCollection'])) { ?>
+					<form method="get" action="<?php echo get_category_link( $chapters[0]->term_id ); ?>" class="view">
+						<input type="hidden" name="edition" value="-1">
+						<button type="submit" class="system">Edit/write</button>
+					</form>
+<?php }?>
 					<form method="get" action="<?php bloginfo('url'); ?>">
 						<input type="hidden" name="edition" value="-1">
 						<input type="hidden" name="generatePDF" value="1">
@@ -126,8 +134,9 @@
 				</div>
 
 <?php } else { ?>
-					<form action="<?php echo "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
+					<form action="<?php bloginfo("url") ?>" method="post">
 						<input type="hidden" name="edition" value="<?php echo $_REQUEST['edition']; ?>">
+						<input type="hidden" name="clear" value="1">
 						<button type="submit" class="system clear">Clear collection</button>
 					</form>
 					

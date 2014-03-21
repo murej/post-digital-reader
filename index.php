@@ -73,13 +73,22 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 					<li id="paragraph-<?php the_title(); ?>" class="pure-g paragraph">
 
 <?php if($editionsAsTags !== false) { ?>
-		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select">#<?php the_title(); ?></a></div>
+		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select" title="Toggle">#<?php the_title(); ?></a></div>
 <?php } else { ?>
 		        		<div class="pure-u-1-12 paragraph-num system"><a href="#delete"><span style="font-size: 1.5em; padding: 0 0.25em;">&times;</span></a></div>
 <?php } ?>
 		        		<div class="pure-u-1-6"></div>
 
-		        		<p class="pure-u-5-12 hyphenate"><?php echo do_shortcode( str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ) ); ?></p>
+		        		<p class="pure-u-5-12 hyphenate"><?php
+		        		
+		        			echo do_shortcode( str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ) );
+/*
+		        			var_dump( get_post_meta($post->ID, 'reference-1', true) );
+		        			var_dump( get_post_meta($post->ID, 'reference-2', true) );
+		        			var_dump( get_post_meta($post->ID, 'reference-3', true) );
+*/
+		        			
+		        		?></p>
 
 		        		<div class="pure-u-1-4 collection-count"><span class="system" title="<?php
 														
@@ -103,24 +112,12 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 				        		echo "Never published";
 			        		}
 
-		        		?>.">(<?php echo $publishedCount;?>x)<span></div>
+		        		?>.">(<?php echo $publishedCount;?>x)</span></div>
 
 		        		<ul class="pure-u-1-12 more system">
 			        		<?php if($edition === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
 			        		<?php if($editionsAsTags !== false) { ?><li class="share"><span>&infin; </span><a href="">SHARE</a></li><?php } ?>
-			        		<li class="link"><form><input type="text" value="<?php
-
-			        			$link = get_category_link(  get_the_category()[0]->term_id );
-
-			        			if($edition && $edition != "-1") {
-				        			$link = add_query_arg( array( "edition" => $edition->slug ), $link );
-			        			}
-
-			        			$link .= "#paragraph-" . get_the_title();
-
-			        			echo $link;
-
-			        		?>"></form></li>
+			        		<li class="link"><form><input type="text" value="<?php echo get_paragraph_permalink( get_the_title(), get_the_category()[0]->term_id, $edition ); ?>"></form></li>
 		        		</ul>
 
 		        	</li>
@@ -139,18 +136,20 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
         		</ul>
 
         	</li>
-<?php //if( $edition === "-1" ) { ?>
+<?php if( $edition === "-1" ) { ?>
         	<li id="add-content" class="pure-g add-content">
 
+<!--
         		<ul id="adding-options">
 
 	        		<li class="pure-u-1-4"></li>
 
 	        		<li class="pure-u-5-12 system">
-		        		<a href="#writer" class="write">Write new</a> | <a href="">Add random</a>
+		        		<a href="#writer" class="write">Write new</a> | <a href="#random" class="random">Add random</a>
 	        		</li>
 
         		</ul>
+-->
 
 		        <div id="writer" class="pure-g">
 
@@ -164,7 +163,14 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 						<?php wp_nonce_field(); ?>
 
 						<input type="hidden" value="<?php echo $currentChapterID; ?>" name="chapter">
-	        			<textarea name="paragraph" placeholder="Start typing and press enter to submit"></textarea>
+	        			<div class="textarea" contenteditable></div>
+	        			
+	        			<input type="hidden" name="paragraph">
+						
+						<ul id="writing-instructions">
+							<li id="add-reference-button" class="system"><a href="#reference">Add reference</a></li>
+							<li id="instructions" class="system">ENTER to submit, ESC to cancel</li>
+						</ul>
 <!--
 	        			<div class="buttons">
 	        				<button type="submit" class="system">Add paragraph</button><span class="system"> or <a href="#" class="cancel">cancel</a></span>
@@ -174,23 +180,51 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 	        		</form>
 
 		        </div>
+		        
+				<div id="add-reference" class="pure-g">
+				
+					<div class="pure-u-1-4"></div>
+					
+					<form class="pure-u-1-2 shadow">
+					
+						<input name="link-or-isbn" type="text" placeholder="Enter ISBN (for books) or URL (for online resources)" required>
+						
+						<div>
+							<span class="leftquote">&ldquo;</span>
+							<textarea name="quote" placeholder="Enter quote (optional)" rows="1"></textarea>
+							<span class="rightquote">&rdquo;</span>
+						</div>
+						
+						<button type="submit" class="system">Add reference</button>
+						
+						<a href="#cancel" class="cancel system">cancel</a>
+
+						<input class="reference-info" type="hidden" name="template" value="">
+											
+					</form>
+				
+				</div>
 
         	</li>
 
+<?php
+	
+	}
 
-
-<?php if( $currentChapterKey+1 <= count($chapters)-1  ) { ?>
+	if( $currentChapterKey+1 <= count($chapters)-1  ) { ?>
 
         	<li id="ch-<?php echo $chapters[$currentChapterKey+1]->cat_ID; ?>" class="pure-g chapter next-chapter">
-
+        		
 				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$currentChapterKey+1]->cat_ID)); ?>">
-
-	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.png" alt="Illustration"></div>
+					
+					<div class="dimmer"></div>
+					
+	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/temp/2.jpg" alt="Illustration"></div>
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 title">
 	        			<h2>Design for</h2>
 	        			<h1><?php echo $chapters[$currentChapterKey+1]->name; ?></h1>
-	        			<h2><a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$currentChapterKey+1]->cat_ID)); ?>">Read next</a> &rarr;</h2>
+	        			<h2>Read next &rarr;</h2>
 	        		</div>
 
 				</a>

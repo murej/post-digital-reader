@@ -89,6 +89,29 @@ function save_extra_post_tag_fields( $term_id, $data ) {
     }
 }
 
+/*
+function removeUnusedParagraphs() {
+	
+	$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
+	
+	$queryParams = array(
+		'nopaging' => true,
+		'tag_id' => array(),
+		'post__in' => $paragraphIDs,
+	);
+
+	$unusedPosts = get_posts($queryParams);
+	
+	foreach($unusedPosts as $par) {
+		
+		if( !get_the_tags($par->ID) ) {
+			// remove from db
+			wp_delete_post( $par->ID );
+		}
+	}
+}
+*/
+
 function removeCollection() {
 
 	if(isset($_COOKIE["myCollection"])) {
@@ -115,8 +138,7 @@ function get_edition_URL($parameter, $url) {
 
 function set_edition($parameter, $url) {
 	
-	Header("Location: " . get_edition_URL($parameter, $url));
-	exit;
+	wp_redirect(get_edition_URL($parameter, $url));
 }
 
 function get_paragraphIDs($cookieData) {
@@ -132,7 +154,21 @@ function get_paragraphIDs($cookieData) {
 	return $paragraphIDs;
 }
 
-// Add [reference-X] shortcode
+function get_paragraph_permalink( $titleID, $categoryID, $edition ) {
+	
+	$link = get_category_link( $categoryID );
+
+	if($edition && $edition != "-1") {
+		$link = add_query_arg( array( "edition" => $edition->slug ), $link );
+	}
+
+	$link .= "#paragraph-" . $titleID;
+
+	return $link;
+
+};
+
+// parse [reference-X] shortcode
 function add_reference_to_post( $atts ) {
 
 	global $post;
@@ -145,17 +181,22 @@ function add_reference_to_post( $atts ) {
 	);
 	
 	//get custom field array
-	$data = get_post_meta($post_id, "reference-".$id, false);
+	$data = get_post_meta($post_id, "reference-".$id, true);
 		
-	$return = '<sup><a href="'.$data[0]["link"].'" class="ref-link system" target="_blank">[&rarr;]</a></sup>';
+	$decoded = '<sup><a href="'.htmlentities($data["link"]).'" class="ref-link system" target="_blank">[&rarr;]</a></sup>';
 	
-	if( !empty($data[0]["quote"]) ) {
-		$return = '<q>'.$data[0]["quote"].'</q>'.$return;
+	if( !empty($data["quote"]) ) {
+		$decoded = '<q>'.urldecode($data["quote"]).'</q>'.$decoded;
 	}
-	
-	return $return;
+			
+	return $decoded;
 }
 add_shortcode( 'reference', 'add_reference_to_post' );
+
+function get_edition_data($chapterID) {
+	
+	return get_option('post_tag_'.$chapterID);
+}
 
 function generate_PDF($editionSlug, $chapters) {
 
@@ -208,7 +249,7 @@ function generate_PDF($editionSlug, $chapters) {
 		
 		$editionData = get_edition_data( get_term_by("slug", $editionSlug, "post_tag")->term_id );
 		
-		$title = $editionData["editionTitle"];
+		$title = get_term_by("slug", $editionSlug, "post_tag")->name;
 		$author = $editionData["author"];
 		//$email = $editionData["email"];
 		$sortString = $editionData["sort"];
@@ -318,9 +359,75 @@ function generate_PDF($editionSlug, $chapters) {
 	}
 }
 
-function get_edition_data($chapterID) {
+function formatParagraphHTML($data) {
+
+	// count times published
+	$publishedCount = $data["publishedCount"];
+
+	$publishCountTitle = "Published in ".$publishedCount." edition";
+
+	// if plural
+	if($publishedCount > 1)
+		$publishCountTitle .= "s";
+
 	
-	return get_option('post_tag_'.$chapterID);
+	return	'<li id="paragraph-'.$data["id"].'" class="pure-g paragraph">
+		
+			<div class="pure-u-1-12 paragraph-num system"><a href="#select">#'.$data["id"].'</a></div>
+			<div class="pure-u-1-6"></div>
+		
+			<p class="pure-u-5-12 hyphenate">'.str_replace("<p>", "", str_replace("</p>", "", $data["content"]) ).'</p>
+		
+			<div class="pure-u-1-4 collection-count"><span class="system" title="'.$publishCountTitle.'.">('.$publishedCount.'x)<span></div>
+		
+			<ul class="pure-u-1-12 more system">
+				<li class="move"><span>&equiv; </span><a href="">MOVE</a></li>
+				<li class="share"><span>&infin; </span><a href="">SHARE</a></li>
+				<li class="link"><form><input type="text" value="'.$data["link"].'"></form></li>
+			</ul>
+		
+		</li>';
+}
+
+add_action( 'wp_ajax_insert_random_paragraph', 'insert_random_paragraph_callback' );
+add_action( 'wp_ajax_nopriv_insert_random_paragraph', 'insert_random_paragraph_callback' );
+
+function insert_random_paragraph_callback() {
+	
+	global $wpdb; // this is how you get access to the database
+
+	$exclude = [];
+
+	foreach( $_POST['collection'] as $titleID ) {
+		
+		$exclude[] = get_page_by_title($titleID, OBJECT, 'post')->ID;
+	}
+
+	$post = get_posts( array(
+	
+		"cat" => $_POST['catID'],
+		"post_status" => "publish",
+		"orderby" => "rand",
+		"posts_per_page" => 1,
+		"post__not_in" => $exclude
+		
+	))[0];
+	
+	if( empty($post) ) {
+		echo "ERROR FETCHING";
+		exit;
+	}
+	else {
+
+		$data["id"] = $post->post_title;
+		$data["content"] = do_shortcode($post->post_content);
+		$data["publishCount"] = count( get_the_tags($post->ID) );
+		$data["link"] = get_paragraph_permalink( $post->post_title, $_POST['catID'] );
+		
+		echo formatParagraphHTML($data);
+	}
+
+	die(); // this is required to return a proper result
 }
 
 add_action( 'wp_ajax_delete_paragraph', 'delete_paragraph_callback' );
@@ -340,16 +447,33 @@ function delete_paragraph_callback() {
 	die(); // this is required to return a proper result
 }
 
+function save_references( $references, $postID ) {
+
+	// add each reference as a custom field array
+	foreach($references as $i => $ref) {
+		add_post_meta($postID, 'reference-'.($i+1), $ref, true);
+	}
+}
+
 function contribute() {
 
 	//Get the submitted form
 	ob_start();
 	require_once($_POST["rootpath"]);
 	
-	$paragraph = $_POST["paragraph"];
+	$paragraph = sanitize_text_field( "<p>".$_POST["paragraph"]."</p>" ); // CHECK THIS sanitize_text_field()
 	$paragraphIDTitle = wp_count_posts('post')+1;	// paragraph IDs are gathered from post titles in order to have them humanly readable 
 	$chapter = $_POST["chapter"];
 	//$edition = $_POST["edition"];
+	$references = $_POST["references"];
+	
+	// delete unused (legacy) posted references
+	foreach($references as $i => $ref) {
+		
+		if($i >= substr_count($paragraph, "[reference id=")) {
+			unset($references[$i]);
+		}
+	}
 	
 	$http_referer = $_POST["_wp_http_referer"];
 	$path = $_POST["rootpath"];
@@ -380,20 +504,17 @@ function contribute() {
 		);
 		
 		//save the new post
-		$pid = wp_insert_post($new_post);
+		$postID = wp_insert_post($new_post);
 	     
-	    // Insert Form data into Custom Fields
-	/*
-	    add_post_meta($pid, 'author', $author, true);
-	    add_post_meta($pid, 'author-email', $email, true);
-	    add_post_meta($pid, 'author-website', $site, true);
-	*/
-	
-	if( isset($pid) ) {
+		//save reference info
+		save_references( $references, $postID );
+		
+		
+	if( isset($postID) ) {
 
 		// mark paragraph as collected
 		updateCollection( strval($paragraphIDTitle) );
-		header("Location: http://" . $_SERVER["HTTP_HOST"].$http_referer . "#paragraph-" . $paragraphIDTitle);
+		wp_redirect("http://" . $_SERVER["HTTP_HOST"].$http_referer . "#paragraph-" . $paragraphIDTitle);
 	}
 	else {
 		echo "ERROR SUBMITTING!";
@@ -406,10 +527,10 @@ function publish() {
 	ob_start();
 	require_once($_POST["rootpath"]);
 		
-	$data["editionTitle"] = $_POST["editionTitle"];
+	$editionTitle = $_POST["editionTitle"];
 	$data["author"] = $_POST["author"];
 	$data["email"] = $_POST["email"];
-	$data["sort"] = $_COOKIE["myCollection"];
+	$data["sort"] = urlencode( stripslashes( $_COOKIE["myCollection"] ) );
 	$data["timestamp"] = time(); // TODO: zakaj to posebi, če je tkoaltko shranjen?
 	$path = $_POST["rootpath"];
 	$nonce = $_POST["_wpnonce"];
@@ -425,17 +546,17 @@ function publish() {
 		// for each paragraph in edition
 		foreach( $paragraphIDs as $parID ) {
 			// set that edition
-			wp_set_post_tags($parID, $data["editionTitle"], true);
+			wp_set_post_tags($parID, $editionTitle, true);
 		}
 		
 		// save edition info
-		$edition = get_term_by('name', $data["editionTitle"], 'post_tag');
-		save_extra_post_tag_fields( $edition->term_id, $data);
+		$edition = get_term_by('name', $editionTitle, 'post_tag');
+		save_extra_post_tag_fields( $edition->term_id, $data );
 	
 	// remove cookie
 	removeCollection();
 		
-	header("Location: " . bloginfo('url') . "?edition=" . $edition->slug);
+	wp_redirect(bloginfo('url') . "?edition=" . $edition->slug);
 	
 }
 
@@ -465,7 +586,7 @@ function importJSON() {
 	);
 
 	removeMyPosts();
-		
+
 	foreach($allPosts as $par) {
 
 		$postCount++;
@@ -494,7 +615,7 @@ function importJSON() {
 			//'post_date_gmt'  => [ Y-m-d H:i:s ] // The time post was made, in GMT.
 			'comment_status' => 'closed', // Default is the option 'default_comment_status', or 'closed'.
 			'post_category'  => array( get_cat_ID( $chapters[$par->chapter] ) ), // Default empty.
-			'tags_input'     => 'original' //, Default empty.
+			'tags_input'     => 'First edition' //, Default empty.
 			//'tax_input'      => [ array( <taxonomy> => <array | string> ) ] // For custom taxonomies. Default empty.
 			//'page_template'  => [ <string> ] // Default empty.
 		);
@@ -504,7 +625,7 @@ function importJSON() {
 		
 			$references[] = array(
 				"link" => $ref->link,
-				"quote" => $ref->quote
+				"quote" => urlencode($ref->quote)
 			);
 		}	
 		
@@ -516,10 +637,7 @@ function importJSON() {
 			// if failed at one
 			if( $postID === 0 ) { echo "ERROR POSTING"; exit; }
 	
-			// add each reference as a custom field array
-			foreach($references as $i => $ref) {
-				add_post_meta($postID, 'reference-'.($i+1), $ref, true);
-			}
+			save_references( $references, $postID );
 
 		// TODO: if existing post
 			
@@ -543,17 +661,16 @@ function importJSON() {
 	}
 	
 	// save edition info
-	$edition = get_term_by('name', 'original', 'post_tag');
+	$edition = get_term_by('name', 'First edition', 'post_tag');
 	$editionData = array(
-		"editionTitle" => "Original",
 		"author" => "Jure Martinec",
 		"email" => "jure.martinec@gmail.com",
-		"sort" => rawurlencode( json_encode($sortArray) ),
+		"sort" => json_encode($sortArray),
 		"timestamp" => time()
 
 	);
-	save_extra_post_tag_fields($edition->term_id, $editionData);
-	
+	save_extra_post_tag_fields($edition->term_id, $editionData); 	// NE DELA!
+		
 	echo "IMPORTED " . $postCount . " POSTS.";	
 	exit;
 }
