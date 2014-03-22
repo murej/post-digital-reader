@@ -54,7 +54,7 @@ body.cover ul#nav li#collector { top: -6em; transition: top 0.25s ease-out; }
 div#cover { position: relative; z-index: 9999; background-color: #323232; height: 100%; top: -4.5em; transition: top 0.5s; transition-delay: 2s; }
 div#cover h1 { font-family: Helvetica, Arial, sans-serif; color: white; margin: 0; font-weight: 700; position: absolute; top: 50%; margin-top: -2.25em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); }
 div#cover h1 span.status { font-family: "Courier New", monospace; font-size: 0.25em; line-height: 0.25; font-weight: 500; text-shadow: none; opacity: 0.125; position: relative; top: -2em; }
-div#cover div.arrow { width: 1em; height: 1em; border-width: 0 0.5em 0.5em 0; border-color: white; border-style: solid; transform: rotate(45deg); position: absolute; top: 50%; margin-top: 3em; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); transition: margin-top 1.5s, opacity 0.5s; transition-delay: 0s, 1s; opacity: 1; }
+div#cover div.arrow { width: 1em; height: 1em; border-width: 0 0.5em 0.5em 0; border-color: white; border-style: solid; transform: rotate(45deg); position: absolute; top: 50%; margin: 3em 0 0 -1.5em; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); transition: margin-top 1.5s, opacity 0.5s; transition-delay: 0s, 1s; opacity: 1; }
 div#cover .facebook { position: absolute; top: 50%; /* 		bottom: 4em; */ margin-top: 13.7em; }
 
 ul#nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; padding: 0; margin: 0; height: 4.5em; background-color: rgba(255, 255, 255, 0.95); }
@@ -62,7 +62,10 @@ ul#nav h3 { float: left; margin: 0 0.5em 0 0; line-height: 4.5; }
 ul#nav h3 span { font-size: 1.5em; position: relative; top: 0.042em; line-height: 1; }
 ul#nav h3 a { display: block; height: 100%; text-decoration: none; }
 ul#nav li#vote { float: right !important; }
-ul#nav li#vote a.vote { display: inline; opacity: 0.25; font-size: 2em; line-height: 1; text-decoration: none; position: relative; top: 0.25em; }
+ul#nav li#vote a.vote { display: inline; opacity: 0.25; font-size: 2em; line-height: 1; text-decoration: none; position: relative; top: 0.225em; }
+ul#nav li#vote a.vote:hover { opacity: 0.25 !important; }
+ul#nav li#vote.voted a.vote { opacity: 1; }
+ul#nav li#vote.voted a.vote:hover { opacity: 1 !important; }
 ul#nav li.no-edition h3 { opacity: 0.25; }
 ul#nav ul#edition-options { padding: 0; margin: 0; }
 ul#nav ul#edition-options li { float: left; padding-left: 0.5em; line-height: 5.17; }
@@ -150,14 +153,22 @@ body.publish-mode div#publish { opacity: 1; top: 0; right: 0; bottom: 0; left: 0
 div#edition-selector { opacity: 0; transition: opacity 0.1s, top 0.1s, right 0.1s, left 0.1s, bottom 0.1s; transition-timing-function: ease-in; position: fixed; top: 0; right: 100%; bottom: 0; left: -100%; background-color: white; z-index: 9999; }
 div#edition-selector div#first-edition { border-bottom: 0.125em solid #323232; }
 div#edition-selector div#first-edition h2 { margin-top: 1em; }
-div#edition-selector h3 { padding: 1.5em 0 1.5em 0; margin: 0; }
-div#edition-selector h3#close { font-size: 2em; font-weight: 500; text-align: right; padding: 0.75em; line-height: 0.75; box-sizing: border-box; }
+div#edition-selector h3 { padding: 1.5em 0 1.5em 0; margin: 0; float: left; }
+div#edition-selector ul#show-all li { float: right; line-height: 5.17; }
+div#edition-selector h3#close { float: right; font-size: 2em; font-weight: 500; text-align: right; padding: 0.75em; line-height: 0.75; box-sizing: border-box; }
 div#edition-selector h3#close span { cursor: pointer; }
 div#edition-selector p { margin: 0 0 2.57143em 0; }
 div#edition-selector ul#tabs { margin-top: 2.57143em; text-align: right; font-family: "Courier New", monospace; }
 div#edition-selector ul#tabs a { text-decoration: none; }
 div#edition-selector ul#tabs a.selected { margin-right: -0.5em; }
-div#edition-selector ul.list { position: absolute; top: 12em; bottom: 0; right: 0; padding: 2.25em 33.33333333% 0 0; overflow: scroll; }
+div#edition-selector ul.list { position: absolute; top: 12em; bottom: 0; right: 0; padding: 2.25em 25% 0 0; overflow: scroll; }
+div#edition-selector ul.list li { position: relative; }
+div#edition-selector ul.list li div.vote { position: absolute; right: 0; top: 0; }
+div#edition-selector ul.list li div.vote span, div#edition-selector ul.list li div.vote a { line-height: 2.57143; }
+div#edition-selector ul.list li div.vote a.vote { opacity: 0.25; font-size: 2em; line-height: 1; text-decoration: none; position: relative; top: 0.225em; }
+div#edition-selector ul.list li div.vote a.vote:hover { opacity: 0.25 !important; }
+div#edition-selector ul.list li div.vote.voted a.vote { opacity: 1; }
+div#edition-selector ul.list li div.vote.voted a.vote:hover { opacity: 1 !important; }
 
 body.edition-select-mode div#edition-selector { opacity: 1; top: 0; right: 0; bottom: 0; left: 0; transition-timing-function: ease-out; }
 
@@ -244,7 +255,7 @@ ul#footer .facebook { margin: 0.6em 0 1.6em 0; }
 
 .system { font-family: "Courier New", monospace; font-size: 0.875em; line-height: 24px; text-transform: uppercase; }
 .system a { text-transform: uppercase; text-decoration: underline; color: #000000; }
-.system span { font-size: 1.5em; position: relative; top: 2px; line-height: 1; }
+.system span:not(.votes) { font-size: 1.5em; position: relative; top: 2px; line-height: 1; }
 
 div#dimmer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; display: none; background-color: #FFFFFF; opacity: 0.9; z-index: 99; }
 

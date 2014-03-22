@@ -3,15 +3,17 @@
 	//importJSON();
 	
 	global $edition;
+	global $editionData;
 	global $allEditions;
 	global $chapters;
 	global $chapterTitle;
 	global $paragraphIDs;
 
+
 	$chapters = get_categories('exclude=1&hide_empty=0'); 
 	$chapterTitle = single_cat_title('', false);
-	
-	$allEditions = get_tags('exclude='.get_term_by('slug','first-edition','post_tag')->term_id);
+
+	$allEditions = get_all_editions_sorted(); 
 
 	// if PDF requested
 	if($_GET['generatePDF']) {
@@ -53,12 +55,17 @@
 		
 		// try to get edition
 		$edition = get_term_by('slug', $_GET["edition"], 'post_tag');
-	
-		// get sort order from saved cookie string
-		$paragraphIDs = get_paragraphIDs( get_edition_data( $edition->term_id )["sort"] );
+		
+		if($edition) {
 
+			// try to get stored edition data
+			$editionData = get_edition_data($edition->term_id);
+	
+			// get sort order from saved cookie string
+			$paragraphIDs = get_paragraphIDs( get_edition_data( $edition->term_id )["sort"] );		
+		}
 		// show first-edition edition if there is no edition set and it was not explicitly cleared
-		if( $edition === false && !isset( $_COOKIE['clearedEditions'] ) ){
+		else if( $edition === false && !isset( $_COOKIE['clearedEditions'] ) ){
 			set_edition("first-edition", $_SERVER['REQUEST_URI']);		
 		}
 	}
@@ -98,7 +105,7 @@
         	<div class="pure-g">
         	
         		<div class="pure-u-1-4"></div>
-				<div class="pure-u-1-2">
+				<div class="pure-u-5-12">
 					
 					<h1>
 						<span class="serif">P05T-D16174L</span><br>
@@ -110,7 +117,7 @@
 					</h1>
 					
 				</div>
-
+				
         		<div class="pure-u-1-12"></div>
         		<div class="pure-u-1-12"><div class="arrow"></div></div>
         		<div class="pure-u-1-12"></div>
@@ -124,7 +131,11 @@
 	<ul id="nav" class="pure-g<?php if( is_home() ) { echo " home"; } ?><?php if($edition === "-1") { echo " mycollection"; } ?>">
         
 		<li id="collector" class="pure-u-1-12" title="Collection info"><form method="post" action="<?php bloginfo('url'); ?>?edition=-1#collection-info"><button type="submit"<?php if( is_home() ) { echo " disabled"; } ?>>0</button><span></span></form></li>
-		<li class="pure-u-1-6 viewing system"><?php if( !is_home() ) { ?>+<a href="#writer" class="write">New</a> +<a href="#random" class="random">random</a><?php } ?></li>
+		<li class="pure-u-1-6 viewing system"><?php
+		
+		if( !is_home() && $edition === "-1" ) { ?>+<a href="#writer" class="write">New</a> +<a href="#random" class="random">random</a><?php } 
+			
+		?></li>
 <?php if($edition === "-1") { ?>
 		<li class="pure-u-1-2">
 			
@@ -144,16 +155,35 @@
 
 		<li class="pure-u-1-2">
 
-			<h3><?php echo $edition->name; ?></h3>
+			<h3 class="edition"><?php echo $edition->name; ?></h3>
 				
 			<ul id="edition-options" class="system">
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&amp;edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a> /</li>
 				<li><a href="#change">change</a></li>
-				<?php if($edition->slug !== "first-edition") { ?><li id="vote"><a href="#vote" class="vote">&#10084;</a> (6)</li><?php } ?>
+				<?php 
+				
+				if($edition->slug !== "first-edition") {
+									
+					$votedCheck = check_if_voted( get_client_ip(), $editionData["votes"] );
+				
+					// if not yet voted
+					if( !$votedCheck ) {
+				?><li id="vote" title="Like this edition."><a href="#vote-<?php echo $edition->term_id; ?>" class="vote">&#10084;</a> <span class="votes"><?php echo count($editionData["votes"]); ?></span><?php
+					// if already voted
+					} else if( !empty($votedCheck) ) {
+				?><li id="vote" class="voted" title="You like it!"><a href="#vote-<?php echo $edition->term_id; ?>" class="vote">&#10084;</a> <span class="votes"><?php echo count($editionData["votes"]); ?></span><?php
+					}
+					
+				?></li><?php
+				
+				} ?>
+				
+				
 <!-- 				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li> -->
 			</ul>
 				
 		</li>
+
 <?php } else { ?>
 		<li class="pure-u-1-2 no-edition">
 				
@@ -179,53 +209,85 @@
 	<div id="edition-selector" class="pure-g">
 
 		<div class="pure-u-1-4"></div>				
-		<h3 class="pure-u-5-12"><!-- Published editions of this book --></h3>
-		<h3 id="close" class="pure-u-1-3"><span>&times;</span></h3>				
+		<div class="pure-u-1-2">
+				
+			<h3>Published editions</h3>
+						
+			<ul id="show-all" class="system">
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">show all</a></li>
+			</ul>
+				
+		</div>
+		<h3 id="close" class="pure-u-1-4"><span>&times;</span></h3>				
 
 		<div class="pure-u-1-4"></div>				
 		<div id="first-edition" class="pure-u-1-2">
-			<h2><a href="<?php echo get_edition_URL("first-edition", get_bloginfo('url')); ?>">First edition</a></h2>
+			<h2><a href="<?php echo get_edition_URL("first-edition", get_bloginfo('url')); ?>">First edition.</a></h2>
 			<p class="system">by <a href="http://www.juremartinec.net/">Jure Martinec</a> on February 24, 2014</p>
 		</div>		
 		<div class="pure-u-1-4"></div>				
 
+<!--
 		<ul id="tabs" class="pure-u-1-6">
 			<li><a href="#list-all" class="selected">All (<?php echo count($allEditions); ?>)</a></li>
 			<li><a href="#list-liked">Liked (0)</a></li>
 			<li><a href="#list-my">My (0)</a></li>
 		</ul>
+-->
 
 		<div class="pure-u-1-12"></div>
         
-		<ul id="list-all" class="pure-u-5-12 list">
+		<ul id="list-all" class="pure-u-1-2 list">
+
 <?php 	foreach( $allEditions as $oneEdition ) { 
 			
-			$data = get_edition_data($oneEdition->term_id);
+			$editionData = get_edition_data($oneEdition->term_id);
 						
-			if(!empty($data["author"])) {
-				$author = $data["author"];
+			if(!empty($editionData["author"])) {
+				$author = $editionData["author"];
 			}
 			else {
 				$author = "Anonymous";
 			}
 			
-			if(!empty($data["email"])) {
-				$author = '<a href="mailto:'.$data["email"].'">'.$author.'</a>';
+			if(!empty($editionData["email"])) {
+				$author = '<a href="mailto:'.$editionData["email"].'">'.$author.'</a>';
 			}
-	
+						
+			$votedCheck = check_if_voted( get_client_ip(), $editionData["votes"] );
+						
 ?>
-			<li id="edition-<?php echo $oneEdition->term_id; ?>">
+			<li>
 				<h2><a href="<?php echo get_edition_URL($oneEdition->slug, get_bloginfo('url')); ?>"><?php echo $oneEdition->name; ?></a></h2>
-				<p class="system">by <?php echo $author; ?> on <?php echo date('F j, Y', $data["timestamp"] ); ?></p>
+				<p class="system">by <?php echo $author; ?> on <?php echo date('F j, Y', $editionData["timestamp"] ); ?></p>
+				
+<?php
+				
+				// if not yet voted
+				if( !$votedCheck ) {
+				
+?>				<div class="vote system" title="Like this edition.">
+					<a href="#vote-<?php echo $oneEdition->term_id; ?>" class="vote">&#10084;</a> <span class="votes"><?php echo count( $editionData["votes"] ); ?></span>
+				</div>
+<?php			}	
+				// if already voted
+				else if( !empty($votedCheck) ) {
+				
+?>				<div class="vote voted system" title="You like it!">
+					<a href="#vote-<?php echo $oneEdition->term_id; ?>" class="vote">&#10084;</a> <span class="votes"><?php echo count( $editionData["votes"] ); ?></span>
+				</div>
+<?php			}?>
 			</li>
 <?php	} 
 ?>		</ul>
 
+<!--
 		<ul id="list-liked" class="pure-u-5-12 list">
 			<li>liked</li>
 		</ul>
 		<ul id="list-my" class="pure-u-5-12 list">
 			<li>my</li>
 		</ul>
+-->
 
 	</div>

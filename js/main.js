@@ -201,10 +201,10 @@ jQuery(document).ready(function($) {
 /** ********* ****************************************************************/
 
 	function updateQueryStringParameter(uri, key, value) {
-		
+
 		var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
-		separator = uri.indexOf('?') !== -1 ? "&" : "?";
-		
+		var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+
 		if (uri.match(re)) {
 			return uri.replace(re, '$1' + key + "=" + value + '$2');
 		}
@@ -368,35 +368,35 @@ jQuery(document).ready(function($) {
 
 		// verify or get ISBN link
 		getReferenceLink( referenceForm.children("input[name=link-or-isbn]").attr("value"), function(linkUrl) {
-						
+
 			if( linkUrl !== false && linkUrl !== 'undefined' ) {
-	
+
 				// define link
 				link.addClass("link")
 				.attr("name","references["+(referenceNum-1)+"][link]")
 				.attr("value", encodeURI( linkUrl ) );
-	
+
 				// define quote
 				quote.addClass("quote")
 				.attr("name","references["+(referenceNum-1)+"][quote]")
 				.attr("value", encodeURI( referenceForm.children("div").children("textarea[name=quote]").val() ) );
-	
+
 				// save to writer form
 				$("div#writer form").append(link, quote);
-	
+
 				// clear form
 				referenceForm.children("input[name=link-or-isbn]").attr("value","");
 				referenceForm.children("div").children("textarea[name=quote]").val("");
-	
+
 				// display reference
 				//var referenceHTML = '&nbsp;<span id="reference-'+referenceNum+'" class="reference-num">'+referenceNum+'</span>&nbsp;';
 				var referenceHTML = '<img id="reference-'+referenceNum+'" class="reference-num" src="http://placehold.it/30x17/ffff00/000000/&text='+referenceNum+'">';
 				//var referenceHTML = '[reference id='+(referenceNum+1)+']';
 				$("div#writer form div.textarea").append(referenceHTML);
-	
+
 				// hide #add-reference
 				$("div#add-reference form").parent().hide();
-	
+
 				// focus writer
 				$("div#writer form div.textarea").get(0).focus();
 				placeCaretAtEnd( $("div#writer form div.textarea")[0] );
@@ -587,12 +587,12 @@ jQuery(document).ready(function($) {
 /** ************* ************************************************************/
 
 	var currParagraphNum = 0;
-	var sanitize = new Sanitize({ 
-		elements:   ['img'],
-		attributes: { 
+	var sanitize = new Sanitize({
+		elements: ['img'],
+		attributes: {
 			img: ['id', 'class', 'src']
 		},
-		protocols:  {  }
+		protocols:  {}
 	});
 	$.cookie.json = true;
 
@@ -601,29 +601,29 @@ jQuery(document).ready(function($) {
 	handleCover();
 	highlightCollectedPars( getCollection() );
 	updateCollector( getCollection().length );
-	$("div#edition-selector").tabs();
+	// $("div#edition-selector").tabs();
 	var allParagraphNum = $("ul#wrapper li p").length;
 
 	setParagraphNum(0, allParagraphNum);
 
-    $( "li#content ul.wrapper" ).sortable({
-        start: function(event, ui) {
-            var start_pos = ui.item.index();
-            ui.item.data('start_pos', start_pos);
-        },
-        update: function(event, ui) {
-            var start_pos = ui.item.data('start_pos');
-            var end_pos = $(ui.item).index();
-            //alert(start_pos + ' -> ' + end_pos);
-            updateSortOrder(ui.item, start_pos, end_pos);
-        },
+	$( "li#content ul.wrapper" ).sortable({
+		start: function(event, ui) {
+			var start_pos = ui.item.index();
+			ui.item.data('start_pos', start_pos);
+		},
+		update: function(event, ui) {
+			var start_pos = ui.item.data('start_pos');
+			var end_pos = $(ui.item).index();
+			//alert(start_pos + ' -> ' + end_pos);
+			updateSortOrder(ui.item, start_pos, end_pos);
+		},
 		axis: "y",
 		disabled: true
 	});
 
-    //$("textarea").autosize();
-    Hyphenator.run();
-    scrollToHash();
+	//$("textarea").autosize();
+	Hyphenator.run();
+	scrollToHash();
 	/**************/
 
 
@@ -761,7 +761,7 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 
 		if( getUrlQueryParameter("edition") === "-1" ) {
-		
+
 			writingMode(true);
 		}
 		else {
@@ -770,7 +770,7 @@ jQuery(document).ready(function($) {
 			// tuki bi se mogu #writer naštimat k se naloada
 		}
 
-		
+
 	});
 
 	$("div#writer form div.textarea").blur(function() {
@@ -795,15 +795,15 @@ jQuery(document).ready(function($) {
 
 				// replace reference placeholders with shortcodes
 				content = $('div#writer form div.textarea').clone();
-				
-				content.children('img').each(function() {					
+
+				content.children('img').each(function() {
 					var refID = $(this).attr("id").replace( /^\D+/g, '');
 					$(this).replaceWith("[reference id="+refID+"]");
 				});
 
 				// add hidden input field with value="content" to make post-able
 				$(this).siblings("input[name=paragraph]").val( content.html() );
-				
+
 				// submit form
 				$('div#writer form').submit();
 			}
@@ -835,7 +835,7 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 
 		//var ajax_object;
-		
+
 
 		ajax_object.catID = $("li.chapter:not(.next-chapter)").attr('id').replace( /^\D+/g, '');
 		ajax_object.collection = getCollection();
@@ -851,9 +851,9 @@ jQuery(document).ready(function($) {
 			var paragraphID = $(response).attr("id").replace( /^\D+/g, '');
 
 			handleCollection( paragraphID );
-			
+
 			if( getUrlQueryParameter("edition") === "-1" ) {
-			
+
 				window.location.href = "#paragraph-"+paragraphID;
 				window.location.reload();
 			}
@@ -864,8 +864,54 @@ jQuery(document).ready(function($) {
 		});
 	});
 
-	// adding references
-	
+	// VOTING
+	$("a.vote").click(function(e){
+
+		e.preventDefault();
+
+		var edition_id = $(this).attr('href').replace( /^\D+/g, '');
+
+		$("a[href=#vote-"+edition_id+"]").each(function() {
+
+			var voter = $(this).parent();
+			var counter = voter.children("span.votes");
+
+			var count = parseInt( counter.text() );
+
+			// if already voted
+			if( voter.hasClass("voted") ) {
+
+				count--;
+
+				counter.text(count);
+				voter.removeClass("voted").attr("title","Like this edition.");
+			}
+			// if not yet voted
+			else {
+
+				count++;
+
+				counter.text(count);
+				voter.addClass("voted").attr("title","You like it!");
+			}
+		});
+
+		var data = {
+
+			action:	"vote_edition",
+			nonce:	ajax_object.nonce,
+			tag_id: edition_id
+		};
+
+		// Ajax call
+		$.post(ajax_object.ajax_url, data, function(count){
+
+			// update all shown vote occurances of voted edition
+			$("a[href=#vote-"+edition_id+"]").siblings("span.votes").text(count);
+		});
+
+		return false;
+	});
 
 	// DELETING PARAGRAPHS
 	$("li.paragraph div.paragraph-num a[href=#delete]").click(function(e) {
@@ -954,11 +1000,11 @@ jQuery(document).ready(function($) {
 	});
 
 	//
-    $("textarea[name=quote]").keyup(function(e) {
+	$("textarea[name=quote]").keyup(function(e) {
 
 		var form = $(this).parent().parent();
 
-        form.css("margin-top", (-parseFloat(form.outerHeight())/16/2)+"em");
+		form.css("margin-top", (-parseFloat(form.outerHeight())/16/2)+"em");
 
 		if(e.keyCode === 27) {
 
@@ -966,38 +1012,37 @@ jQuery(document).ready(function($) {
 			$("div#writer div.textarea").get(0).blur();
 			$("div#add-reference").hide();
 		}
-    });
+	});
 
-    $("div#add-reference form button[type=submit]").click(function() {
+	$("div#add-reference form button[type=submit]").click(function() {
 
 		addReferenceToWriter();
-    });
+	});
 
 
 	// TEXTAREA AUTO RESIZE
-    $("textarea").keyup(function(){
+	$("textarea").keyup(function(){
 
-        $(this).autosize().trigger('autosize.resize');
-    });
-
-    $("div#add-reference a[href=#cancel]").click(function(e) {
-
-		e.preventDefault();
-
-		$("div#add-reference").hide();
-		$("div#writer div.textarea").get(0).focus();
-    });
-
-    $("div#add-reference").click(function(e) {
-
-		e.preventDefault();
-
-		$("div#add-reference").hide();
-		$("div#writer div.textarea").get(0).focus();
-    }).children().click(function() {
-		return false;
+		$(this).autosize().trigger('autosize.resize');
 	});
 
+	$("div#add-reference a[href=#cancel]").click(function(e) {
+
+		e.preventDefault();
+
+		$("div#add-reference").hide();
+		$("div#writer div.textarea").get(0).focus();
+	});
+
+	$("div#add-reference").click(function(e) {
+
+		e.preventDefault();
+
+		$("div#add-reference").hide();
+		$("div#writer div.textarea").get(0).focus();
+	}).children().click(function() {
+		return false;
+	});
 });
 
 /* **********************************************

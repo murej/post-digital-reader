@@ -187,7 +187,7 @@ div#cover {
 		
 		position: absolute;
 		top: 50%;
-		margin-top: 3em;
+		margin: 3em 0 0 -1.5em;
 
 		box-shadow: 2px 2px 4px rgba(0,0,0,0.25);
 		
@@ -253,7 +253,20 @@ ul#nav {
 			text-decoration: none;
 							
 			position: relative;
-			top: 0.25em;
+			top: 0.225em;
+		}
+		
+		a.vote:hover {
+			opacity: 0.25 !important;
+		}
+	}
+	li#vote.voted {
+		
+		a.vote {
+			opacity: 1;
+		}
+		a.vote:hover {
+			opacity: 1 !important;
 		}
 	}
 
@@ -447,10 +460,22 @@ div#edition-selector {
 	h3 {
 		padding: 1.5em 0 1.5em 0;
 		margin: 0;
+		
+		float: left;
 
+	}
+	
+	ul#show-all {
+		
+		li {
+			float: right;
+			line-height: 5.17;
+		}
 	}
 
 	h3#close {
+		float: right;
+		
 		font-size: 2em;
 		font-weight: 500;
 		text-align: right;
@@ -479,8 +504,47 @@ div#edition-selector {
 		top: 12em;
 		bottom: 0;
 		right: 0;
-		padding: 2.25em 33.33333333% 0 0;
+		padding: 2.25em ((1/4)*100%) 0 0;
 		overflow: scroll;
+		
+		li {
+			
+			position: relative;
+			
+			div.vote {
+				
+				position: absolute;
+				right: 0;
+				top: 0;
+				
+				span, a {
+					line-height: (36/14);
+				}
+				
+				a.vote {
+					opacity: 0.25;
+					font-size: (32/16)*1em;
+					line-height: 1;
+					text-decoration: none;
+									
+					position: relative;
+					top: 0.225em;
+				}
+				
+				a.vote:hover {
+					opacity: 0.25 !important;
+				}
+			}
+			div.vote.voted {
+				
+				a.vote {
+					opacity: 1;
+				}
+				a.vote:hover {
+					opacity: 1 !important;
+				}
+			}
+		}
 	}
 }
 
@@ -1030,7 +1094,7 @@ ul#footer {
 		color: #000000;
 	}
 
-	span {
+	span:not(.votes) {
 		font-size: 1.5em;
 		position: relative;
 		top: 2px;
