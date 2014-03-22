@@ -65,7 +65,10 @@
 	        		
 	        		<form action="http://twitter.com/postdigitreader"><button type="submit" class="system light">Follow on Twitter</button></form>
 	        			
-	        		<form action="#RSS-link"><button type="submit" class="system light">Get RSS feed</button></form>
+	        		<form action="<?php bloginfo("url"); ?>">
+	        			<input type="hidden" name="feed" value="references">
+	        			<button type="submit" class="system light">Subscribe to RSS</button>
+	        		</form>
 	        			
 				</div>
 				

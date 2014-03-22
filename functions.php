@@ -36,6 +36,31 @@ add_filter('wp_head','remove_admin_bar_style_frontend', 99);
 
 
 /********************************************************************/
+/*	RSS FEED														*/
+/********************************************************************/
+
+function create_referencefeed() {
+	load_template( get_template_directory() . '/feed-references-rss2.php'); // You'll create a your-custom-feed.php file in your theme's directory
+}
+add_action('do_feed_references', 'create_referencefeed', 10, 1); // Make sure to have 'do_feed_customfeed'
+
+add_filter('transient_rewrite_rules','custom_feed_rewrite_rule');
+add_filter('rewrite_rules_array','custom_feed_rewrite_rule');
+
+function custom_feed_rewrite_rule($rules){
+
+	$feed_rules = array(
+		'feed/references' => 'index.php?feed=references',
+		'references' => 'index.php?feed=references',
+		'references.xml' => 'index.php?feed=references'
+	);
+	
+	$rules = $feed_rules + $rules;
+	return $rules;
+}
+
+
+/********************************************************************/
 /*	MANAGING NEW CONTENT											*/
 /********************************************************************/
 
@@ -640,7 +665,7 @@ function get_edition_data($editionID) {
 
 function generate_PDF($editionSlug, $chapters) {
 
-	$pdfPath = "wp-content/editions/".$editionSlug.".pdf";
+	$pdfPath = str_replace(get_bloginfo("url")."/", "", content_url("/editions/".$editionSlug.".pdf"));
 	$niceName = "Post-digital Reader (".get_term_by('slug', $editionSlug, 'post_tag')->name.").pdf";
 
 	// IF PDF ALREDY EXISTS
