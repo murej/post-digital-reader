@@ -1,4 +1,8 @@
 <?php get_header(); ?>
+
+<audio>
+  <source src="<?php bloginfo('template_url'); ?>/media/poof.wav" type="audio/wav">
+</audio>
                 
         <ul id="wrapper">
         
@@ -16,12 +20,9 @@
 <?php
 	foreach($chapters as $i => $chapter) {
 	
-		$postQuery['category'] = $chapter->cat_ID;
-		$postQuery['nopaging'] = true;
-		if($edition === "-1") { $postQuery['post__in'] = $paragraphIDs; }
-		else if($edition) { $postQuery['tag'] = $_REQUEST['edition']; }
-		$checkForPosts = get_posts($postQuery);
-		
+		if($edition === "-1") { $checkForPosts = check_for_posts($chapter->cat_ID, $paragraphIDs, $edition); }
+		else { $checkForPosts = check_for_posts($chapter->cat_ID, $paragraphIDs, $edition->slug); }
+
 ?>
         	<li id="ch-<?php echo $chapter->cat_ID; ?>" class="pure-g chapter<?php if(!$checkForPosts) { echo " empty"; } ?>">
 
@@ -29,7 +30,7 @@
 				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapter->cat_ID)); ?>"> 
 <?php 	} ?>
 
-	        		<div class="pure-u img"><img src="<?php echo get_bloginfo('template_url') . "/img/temp/" . ($i+1) . ".jpg"; ?>" alt="Illustration"></div>
+	        		<div class="pure-u img"><img src="<?php echo get_bloginfo('template_url') . "/img/temp/" . $chapters[$i]->slug . ".jpg"; ?>" alt="Illustration"></div>
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 title">
 	        			<h2>Design for</h2>
@@ -104,7 +105,13 @@
 <?php } else { ?>
 
 				<div class="pure-u-1-4 left">
-	        		<form action="<?php echo get_category_link( $chapters[0]->term_id ); ?>">
+	        		<form action="<?php
+	        		
+	        		$firstChapterKey = find_first_available_chapter();
+	        		
+	        		echo get_category_link( $chapters[$firstChapterKey]->term_id );
+	        		
+	        		?>">
 						<input type="hidden" name="edition" value="<?php echo $_REQUEST['edition']; ?>">
 	        			<button type="submit" class="system">Start collecting</button>
 	        		</form>
@@ -118,7 +125,7 @@
 <?php if(isset($_COOKIE['myCollection'])) { ?>
 					<form method="get" action="<?php echo get_category_link( $chapters[0]->term_id ); ?>" class="view">
 						<input type="hidden" name="edition" value="-1">
-						<button type="submit" class="system">Edit/write</button>
+						<button type="submit" class="system">Edit mode</button>
 					</form>
 <?php }?>
 					<form method="get" action="<?php bloginfo('url'); ?>">

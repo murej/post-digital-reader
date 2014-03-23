@@ -41,7 +41,7 @@
 
         	<li id="chapter-<?php echo $currentChapterID; ?>" class="pure-g chapter">
 
-        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/illustration.png"></div>
+        		<div class="pure-u img"><img src="<?php echo get_bloginfo('template_url') . "/img/temp/" . get_term_by("id", $currentChapterID, "category")->slug . ".jpg"; ?>"></div>
         		<div class="pure-u-1-4"></div>
         		<div class="pure-u-1-2 title">
         			<h2>Design for</h2>
@@ -73,7 +73,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 					<li id="paragraph-<?php the_title(); ?>" class="pure-g paragraph">
 
 <?php if($editionsAsTags !== false) { ?>
-		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select" title="Toggle">#<?php the_title(); ?></a></div>
+		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select" title="Toggle selection">#<?php the_title(); ?></a></div>
 <?php } else { ?>
 		        		<div class="pure-u-1-12 paragraph-num system"><a href="#delete"><span style="font-size: 1.5em; padding: 0 0.25em;">&times;</span></a></div>
 <?php } ?>
@@ -210,20 +210,23 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 <?php
 	
 	}
+	
+	// find next chapter
+	$nextChapterKey = find_first_available_chapter($currentChapterID);
 
-	if( $currentChapterKey+1 <= count($chapters)-1  ) { ?>
+	if( $nextChapterKey ) { ?>
 
-        	<li id="ch-<?php echo $chapters[$currentChapterKey+1]->cat_ID; ?>" class="pure-g chapter next-chapter">
+        	<li id="ch-<?php echo $chapters[$nextChapterKey]->cat_ID; ?>" class="pure-g chapter next-chapter">
         		
-				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$currentChapterKey+1]->cat_ID)); ?>">
+				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$nextChapterKey]->cat_ID)); ?>">
 					
 					<div class="dimmer"></div>
 					
-	        		<div class="pure-u img"><img src="<?php bloginfo('template_url'); ?>/img/temp/2.jpg" alt="Illustration"></div>
+	        		<div class="pure-u img"><img src="<?php echo get_bloginfo('template_url') . "/img/temp/" . $chapters[$nextChapterKey]->slug . ".jpg"; ?>" alt="Illustration"></div>
 	        		<div class="pure-u-1-4"></div>
 	        		<div class="pure-u-1-2 title">
 	        			<h2>Design for</h2>
-	        			<h1><?php echo $chapters[$currentChapterKey+1]->name; ?></h1>
+	        			<h1><?php echo $chapters[$nextChapterKey]->name; ?></h1>
 	        			<h2>Read next &rarr;</h2>
 	        		</div>
 

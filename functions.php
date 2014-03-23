@@ -12,7 +12,7 @@ function enqueue_all_scripts() {
 	//wp_enqueue_script('jquery','/wp-includes/js/jquery/jquery.js','','',true);
 
 	// adds built in dependencies
-	$dependencies = array('jquery','jquery-ui-core','jquery-ui-sortable','jquery-ui-tabs','underscore');
+	$dependencies = array('jquery','jquery-ui-core','jquery-ui-sortable','jquery-effects-core','underscore');
 
 	// loads main script
 	wp_enqueue_script('main-script', get_bloginfo('template_url').'/js/main.js', $dependencies, '', true );
@@ -269,11 +269,16 @@ function add_reference_to_post( $atts ) {
 	//get custom field array
 	$data = get_post_meta($post_id, "reference-".$id, true);
 
-	$decoded = '<sup><a href="'.htmlentities($data["link"]).'" class="ref-link system" target="_blank">[&rarr;]</a></sup>';
+/* 	$decoded = '<span><a href="'.htmlentities($data["link"]).'" class="ref-link system" target="_blank">&#9758;</a></span>'; */
 
 	if( !empty($data["quote"]) ) {
-		$decoded = '<q>'.urldecode($data["quote"]).'</q>'.$decoded;
+		$decoded = '<q><a href="'.htmlentities($data["link"]).'" class="ref-link" target="_blank">'.urldecode($data["quote"]).'</a></q>';
 	}
+	else {
+		$decoded = '<a href="'.htmlentities($data["link"]).'" class="ref-link" target="_blank">&#9758;</a>';
+	}
+
+/* 	$decoded = '<a href="'.htmlentities($data["link"]).'" class="ref-link" target="_blank">'.$content.'</a>'; */
 
 	return $decoded;
 }
@@ -656,6 +661,66 @@ function get_paragraph_permalink( $titleID, $categoryID, $edition ) {
 function get_edition_data($editionID) {
 
 	return get_option('post_tag_'.$editionID);
+}
+
+function check_for_posts($chapterID, $paragraphIDs, $editionSlug) {
+	
+	$postquery = [];
+	
+	$postQuery['category'] = $chapterID;
+	$postQuery['nopaging'] = true;
+	if($editionSlug === "-1") { $postQuery['post__in'] = $paragraphIDs; }
+	else if($editionSlug) { $postQuery['tag'] = $editionSlug; }
+		
+	return get_posts($postQuery);
+}
+
+function find_first_available_chapter($currentChapterID) {
+	
+	global $edition;
+	global $chapters;
+	global $paragraphIDs;
+		
+	// if current chapter not provided
+	if( empty($currentChapterID) ) {
+	
+		// set it as first chapter
+		$currentChapterID = intval( $chapters[0]->term_id );
+		
+		// and check it too
+		$checkforposts = check_for_posts( $chapters[$i+$j]->cat_ID, $paragraphIDs, $edition->slug );
+
+		if( !empty($checkforposts) ) {
+			
+			return 0;
+		}
+	}
+	
+	// go through all chapters
+	foreach( $chapters as $i => $chapter ) {
+			
+		// find which chapter is current
+		if( intval($chapter->term_id) === $currentChapterID ) {
+		
+			// go through all following chapters
+			for($j=1; $chapters[$i+$j]; $j++) {
+				
+				// check if it has content
+				$checkforposts = check_for_posts( $chapters[$i+$j]->cat_ID, $paragraphIDs, $edition->slug );
+
+				// if it has content
+				if( !empty($checkforposts) ) {
+					
+					// return appropriate array key
+					return $i+$j;
+					break;
+				}
+			}
+			break;
+		}
+	}
+	
+	return false;
 }
 
 

@@ -36,6 +36,10 @@
 	
 		publish();
 	}
+	else if( $_GET["clear-edition"] ) {
+		
+		
+	}
 	// if my collection requested with already collected items
 	else if( $_GET["edition"] === "-1" && isset($_COOKIE["myCollection"]) ) {
 	
@@ -93,7 +97,7 @@
 
     </head>
     
-    <body class="<?php if( is_home() ) { echo "start cover"; } ?>">
+    <body class="<?php if( is_home() ) { echo "start cover home"; } ?>">
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
@@ -198,7 +202,23 @@
 		<li class="pure-u-1-6"></li>
 		<li class="pure-u-1-12">
 			<h3 id="toc">
-				<a href="<?php if($edition) { echo add_query_arg( array("edition" => $_GET["edition"]), bloginfo('url')); } else { echo bloginfo('url'); } ?>#ch-<?php echo $chapters[0]->term_id; ?>">
+				<a href="<?php
+					
+					$firstNextChapterKey = find_first_available_chapter();
+				
+					if($edition) {
+					
+						echo add_query_arg( array("edition" => $_GET["edition"]), bloginfo('url'));
+					}
+					else { 
+					
+						echo bloginfo('url');
+						
+					} 
+					
+					echo "#ch-".$chapters[$firstNextChapterKey]->term_id;
+					
+				?>">
 					<span class="system">&equiv; </span>TOC
 				</a>
 			</h3>
@@ -214,7 +234,7 @@
 			<h3>Published editions</h3>
 						
 			<ul id="show-all" class="system">
-				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">show all</a></li>
+				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>?clear-edition=1" class="clear-edition">show all</a></li>
 			</ul>
 				
 		</div>
@@ -258,7 +278,11 @@
 						
 ?>
 			<li>
-				<h2><a href="<?php echo get_edition_URL($oneEdition->slug, get_bloginfo('url')); ?>"><?php echo $oneEdition->name; ?></a></h2>
+				<h2><a <?php 
+				
+					if($oneEdition->name === $edition->name){ echo 'class="highlight" '; }
+				
+				?>href="<?php echo get_edition_URL($oneEdition->slug, get_bloginfo('url')); ?>"><?php echo $oneEdition->name; ?></a></h2>
 				<p class="system">by <?php echo $author; ?> on <?php echo date('F j, Y', $editionData["timestamp"] ); ?></p>
 				
 <?php
