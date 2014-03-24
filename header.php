@@ -44,7 +44,7 @@
 	else if( $_GET["edition"] === "-1" && isset($_COOKIE["myCollection"]) ) {
 	
 		// set edition as my collection
-		$edition = "-1";
+		$edition->name = "-1";
 		$paragraphIDs = get_paragraphIDs( $_COOKIE["myCollection"] );
 	}
 /*
@@ -83,7 +83,12 @@
     <head>
         <meta charset="<?php bloginfo( 'charset' ); ?>">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title><?php if(isset($chapterTitle)) { echo "Design for " . $chapterTitle . " // "; } ?>Post-Digital Reader<?php if($edition) { echo " (".$edition->name.")"; } ?></title>
+        <title><?php if(isset($chapterTitle)) { echo "Design for " . $chapterTitle . " // "; } ?>Post-Digital Reader<?php
+        
+        	if($edition->name === "-1") { echo " (My collection)"; }
+        	else if($edition) { echo " (edition: ".$edition->name.")"; }
+        	
+        ?></title>
         <meta name="description" content="<?php bloginfo('description'); ?>">
         <meta name="viewport" content="width=device-width">
 
@@ -139,7 +144,7 @@
 
 <?php } ?>
         
-	<ul id="nav" class="pure-g<?php if( is_home() ) { echo " home"; } ?><?php if($edition === "-1") { echo " mycollection"; } ?>">
+	<ul id="nav" class="pure-g<?php if( is_home() ) { echo " home"; } ?><?php if($edition->name === "-1") { echo " mycollection"; } ?>">
         
 		<li id="collector" class="pure-u-1-12" title="Collection info">
 			<form method="get" action="<?php bloginfo('url'); ?>#collection-info">
@@ -150,13 +155,13 @@
 			</form></li>
 		<li class="pure-u-1-6 viewing system"><?php
 		
-		if( !is_home() && $edition === "-1" ) { ?>+<a href="#writer" class="write">New</a> +<a href="#random" class="random">random</a><?php } 
+		if( !is_home() && $edition->name === "-1" ) { ?>+<a href="#writer" class="write">New</a> +<a href="#random" class="random">random</a><?php } 
 		else if( !is_home() ) { ?><a href="<?php echo get_category_link( get_cat_ID( $chapterTitle ) ); ?>?edition=-1" class="write">Edit/write</a>
 		<span href="<?php echo get_category_link( get_cat_ID( $chapterTitle ) ); ?>?edition=-1" class="disabled" title="Collect a paragraph first.">Edit/write</span><?php
 		} 
 			
 		?></li>
-<?php if($edition === "-1") { ?>
+<?php if($edition->name === "-1") { ?>
 		<li class="pure-u-1-2">
 			
 			<h3>My collection</h3>
@@ -164,7 +169,7 @@
 			<ul id="edition-options" class="system">
 				<li><a href="<?php bloginfo('url'); ?>?edition=<?php echo $_REQUEST['edition']; ?>#collection-info">publish</a> /</li>
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&amp;edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a> /</li>
-				<li><a href="#change">select edition</a></li>
+				<li><a href="#change">select an edition</a></li>
 <!-- 				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li> -->
 			</ul>
 				
@@ -207,10 +212,10 @@
 <?php } else { ?>
 		<li class="pure-u-1-2 no-edition">
 				
-			<h3>Showing all editions</h3>
+<!-- 			<h3>Showing all</h3> -->
 						
 			<ul id="edition-options" class="system">
-				<li><a href="#change">change</a></li>
+				<li style="padding-left:0;"><a href="#change">select an edition</a></li>
 			</ul>
 				
 		</li>

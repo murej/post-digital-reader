@@ -20,13 +20,13 @@
 <?php
 	foreach($chapters as $i => $chapter) {
 	
-		if($edition === "-1") { $checkForPosts = check_for_posts($chapter->cat_ID, $paragraphIDs, $edition); }
+		if($edition->name === "-1") { $checkForPosts = check_for_posts($chapter->cat_ID, $paragraphIDs, $edition->name); }
 		else { $checkForPosts = check_for_posts($chapter->cat_ID, $paragraphIDs, $edition->slug); }
 
 ?>
         	<li id="ch-<?php echo $chapter->cat_ID; ?>" class="pure-g chapter<?php if(!$checkForPosts) { echo " empty"; } ?>">
 
-<?php 	if($checkForPosts || $edition === "-1") { ?>
+<?php 	if($checkForPosts || $edition->name === "-1") { ?>
 				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapter->cat_ID)); ?>"> 
 <?php 	} ?>
 
@@ -37,7 +37,7 @@
 	        			<h1><?php echo $chapter->name; ?><?php echo '<span class="counter"> ('.count($checkForPosts).')</span>'; ?></h1>
 	        		</div>
 
-<?php 	if($checkForPosts || $edition === "-1") { ?>
+<?php 	if($checkForPosts || $edition->name === "-1") { ?>
 				</a>
 <?php 	} ?>
 
@@ -125,7 +125,7 @@
 <?php if(isset($_COOKIE['myCollection'])) { ?>
 					<form method="get" action="<?php echo get_bloginfo("url") . "#ch-".$chapters[0]->term_id; ?>" class="view">
 						<input type="hidden" name="edition" value="-1">
-						<button type="submit" class="system" <?php if($edition === "-1") { echo "disabled"; } ?>>Edit/write</button>
+						<button type="submit" class="system" <?php if($edition->name === "-1") { echo "disabled"; } ?>>Edit/write</button>
 					</form>
 <?php }?>
 					<form method="get" action="<?php bloginfo('url'); ?>">

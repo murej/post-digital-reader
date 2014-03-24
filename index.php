@@ -21,7 +21,7 @@
 	}
 
 	// if edition is set, but is not my collection
-	if($edition !== "-1") {
+	if($edition->slug !== "-1") {
 		$queryParams['tag_id'] = $edition->term_id;
 	}
 
@@ -115,7 +115,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        		?>.">(<?php echo $publishedCount;?>x)</span></div>
 
 		        		<ul class="pure-u-1-12 more system">
-			        		<?php if($edition === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
+			        		<?php if($edition->name === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
 			        		<?php if($editionsAsTags !== false) { ?><li class="share"><span>&infin; </span><a href="">SHARE</a></li><?php } ?>
 			        		<li class="link"><form><input type="text" value="<?php echo get_paragraph_permalink( get_the_title(), get_the_category()[0]->term_id, $edition ); ?>"></form></li>
 		        		</ul>
@@ -125,18 +125,23 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 <?php wp_reset_postdata(); ?>
 
 <?php endwhile; else: ?>
-<!--
+
 				<li class="pure-g paragraph">
 					<div class="pure-u-1-4"></div>
-					<p class="pure-u-5-12 hyphenate"><?php _e('Sorry, not much to see here.'); ?></p>
+					<p class="pure-u-5-12 hyphenate"><?php _e("Sorry, there are no paragraphs in this chapter in your current edition."); ?></p>
 				</li>
--->
+
+				<li class="pure-g paragraph">
+					<div class="pure-u-1-4"></div>
+					<p class="pure-u-5-12 hyphenate system"><a href="#writer" class="write">Start writing</a> or <a href="#random" class="random">insert a random one</a></p>
+				</li>
+
 <?php endif; ?>
 
         		</ul>
 
         	</li>
-<?php if( $edition === "-1" ) { ?>
+<?php if( $edition->name === "-1" ) { ?>
         	<li id="add-content" class="pure-g add-content">
 
 <!--

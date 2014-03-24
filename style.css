@@ -465,7 +465,7 @@ ul#wrapper {
     -webkit-filter: grayscale(100%);
     /* Chrome 19+, Safari 6+, Safari 6+ iOS */ }
   ul#wrapper li#content ul.wrapper {
-    /* 			padding-bottom: 11em; */
+    padding-bottom: 11em;
     /* 			border-bottom: 2px solid black; */ }
     ul#wrapper li#content ul.wrapper li.paragraph {
       margin: 0 0 1.5em 0;
@@ -576,6 +576,7 @@ ul#wrapper {
     margin-bottom: 13.71em; }
   ul#wrapper li.add-content div#writer {
     display: none;
+    padding-bottom: 100%;
     position: relative;
     z-index: 100;
     overflow: scroll; }
