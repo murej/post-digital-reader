@@ -1,1 +1,71 @@
-body{font-family:Helvetica,Arial,sans-serif;font-size:16px}h1{font-family:Helvetica,Arial,sans-serif;font-size:4em;line-height:0.88889;padding-top:2em}h2{font-size:4em;line-height:0.88889;margin:0 0 1em 0;font-family:Georgia,serif;font-weight:normal}h3{margin:0 0 0.75em 0;font-size:1em;font-weight:normal}h4{font-weight:normal}div#edition{position:absolute;bottom:3em;right:4em;left:4em}h4.edition{padding-bottom:1.71429em}h3.title{font-weight:bold}p.info{font-weight:normal;padding-bottom:1.14286em}p.link{text-decoration:underline;color:blue}.serif{font-family:Georgia,serif}.strikethrough{font-weight:normal;text-decoration:line-through}.system{font-family:Courier,monospace;font-size:0.875em;text-transform:uppercase}p{line-height:1.5}p span{font-size:0.875em;font-family:Courier,monospace;color:#bfbfbf}footer{visibility:hidden}
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px; }
+
+h1 {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 4em;
+  line-height: 0.88889;
+  padding-top: 2em; }
+
+h2 {
+  font-size: 4em;
+  line-height: 0.88889;
+  margin: 0 0 1em 0;
+  font-family: Georgia, serif;
+  font-weight: normal; }
+
+h3 {
+  margin: 0 0 0.75em 0;
+  font-size: 1em;
+  font-weight: normal; }
+
+h4 {
+  font-weight: normal; }
+
+a {
+  color: #000000;
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(0, 0, 0, 0.25); }
+
+div#edition {
+  position: absolute;
+  bottom: 3em;
+  right: 4em;
+  left: 4em; }
+
+h4.edition {
+  padding-bottom: 1.71429em; }
+
+h3.title {
+  font-weight: bold; }
+
+p.info {
+  font-weight: normal;
+  padding-bottom: 1.14286em; }
+
+p.link {
+  text-decoration: underline;
+  color: blue; }
+
+.serif {
+  font-family: Georgia, serif; }
+
+.strikethrough {
+  font-weight: normal;
+  text-decoration: line-through; }
+
+.system {
+  font-family: Courier, monospace;
+  font-size: 0.875em;
+  text-transform: uppercase; }
+
+p {
+  line-height: 1.5; }
+  p span {
+    font-size: 0.875em;
+    font-family: Courier, monospace;
+    color: #bfbfbf; }
+
+footer {
+  visibility: hidden; }

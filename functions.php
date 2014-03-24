@@ -851,12 +851,12 @@ function generate_PDF($editionSlug, $chapters) {
 					// insert current postID to shortcodes
 					$output = str_replace(']', ' post_id='.$paragraph->ID.']', $output);
 					// add paragraph number at the end
-					$output = str_replace("</p>", "<span> #". $paragraph->post_title ."</span></p>", $output );
+					$output = str_replace("</p>", "<span> &para;". $paragraph->post_title ."</span></p>", $output );
 					// execute shortcodes
 					$output = do_shortcode( $output );
 					// add quotation marks (fallback for unsupported CSS)
-					$output = str_replace('<q>', '<q>&ldquo;', $output);
-					$output = str_replace('</q>', '&rdquo;</q>', $output);
+					$output = str_replace('<q>', '<q>&raquo;', $output);
+					$output = str_replace('</q>', '&laquo;</q>', $output);
 					// write to PDF
 					$mpdf->WriteHTML($output,2);
 				}

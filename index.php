@@ -73,7 +73,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 					<li id="paragraph-<?php the_title(); ?>" class="pure-g paragraph">
 
 <?php if($editionsAsTags !== false) { ?>
-		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select" title="Toggle selection">#<?php the_title(); ?></a></div>
+		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select" title="Toggle selection">&para;<?php the_title(); ?></a></div>
 <?php } else { ?>
 		        		<div class="pure-u-1-12 paragraph-num system"><a href="#delete"><span style="font-size: 1.5em; padding: 0 0.25em;">&times;</span></a></div>
 <?php } ?>

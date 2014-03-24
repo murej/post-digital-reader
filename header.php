@@ -83,11 +83,18 @@
     <head>
         <meta charset="<?php bloginfo( 'charset' ); ?>">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title><?php if(isset($chapterTitle)) { echo "Design for " . $chapterTitle . " &infin; "; } ?>Post-Digital Reader</title>
-        <meta name="description" content="">
+        <title><?php if(isset($chapterTitle)) { echo "Design for " . $chapterTitle . " // "; } ?>Post-Digital Reader<?php if($edition) { echo " (".$edition->name.")"; } ?></title>
+        <meta name="description" content="<?php bloginfo('description'); ?>">
         <meta name="viewport" content="width=device-width">
 
+<!-- 		<meta property="og:url" content="<?php echo get_bloginfo("url"); ?>"> -->
+		<meta property="og:image" content="<?php bloginfo("template_url"); ?>/img/icon512x512.png">
+		<meta property="og:title" content="<?php echo get_bloginfo("name"); ?>">
+		<meta property="og:description" content="<?php bloginfo('description'); ?>">
+
         <link rel="stylesheet" href="<?php echo get_stylesheet_uri() . '?t=' . filemtime( get_stylesheet_directory() . '/style.css' ); ?>">
+
+		<link rel="shortcut icon" href="<?php echo bloginfo("template_url"); ?>/img/favicon.ico">
 
         <!--[if lt IE 9]>
             <script src="<?php bloginfo('template_url'); ?>/js/vendor/html5-3.6-respond-1.1.0.min.js"></script>
@@ -134,10 +141,19 @@
         
 	<ul id="nav" class="pure-g<?php if( is_home() ) { echo " home"; } ?><?php if($edition === "-1") { echo " mycollection"; } ?>">
         
-		<li id="collector" class="pure-u-1-12" title="Collection info"><form method="post" action="<?php bloginfo('url'); ?>?edition=-1#collection-info"><button type="submit"<?php if( is_home() ) { echo " disabled"; } ?>>0</button><span></span></form></li>
+		<li id="collector" class="pure-u-1-12" title="Collection info">
+			<form method="get" action="<?php bloginfo('url'); ?>#collection-info">
+			
+				<input type="hidden" name="edition" value="<?php echo $_REQUEST["edition"]; ?>">
+				<button type="submit"<?php if( is_home() ) { echo " disabled"; } ?>>0</button><span></span>
+				
+			</form></li>
 		<li class="pure-u-1-6 viewing system"><?php
 		
 		if( !is_home() && $edition === "-1" ) { ?>+<a href="#writer" class="write">New</a> +<a href="#random" class="random">random</a><?php } 
+		else if( !is_home() ) { ?><a href="<?php echo get_category_link( get_cat_ID( $chapterTitle ) ); ?>?edition=-1" class="write">Edit/write</a>
+		<span href="<?php echo get_category_link( get_cat_ID( $chapterTitle ) ); ?>?edition=-1" class="disabled" title="Collect a paragraph first.">Edit/write</span><?php
+		} 
 			
 		?></li>
 <?php if($edition === "-1") { ?>
@@ -148,7 +164,7 @@
 			<ul id="edition-options" class="system">
 				<li><a href="<?php bloginfo('url'); ?>?edition=<?php echo $_REQUEST['edition']; ?>#collection-info">publish</a> /</li>
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&amp;edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a> /</li>
-				<li><a href="#change">change</a></li>
+				<li><a href="#change">select edition</a></li>
 <!-- 				<li><a href="<?php if( is_home() ) { bloginfo('url'); } else { echo get_category_link( get_cat_ID( $chapterTitle ) ); } ?>" class="clear-edition">deselect</a></li> -->
 			</ul>
 				
@@ -163,7 +179,7 @@
 				
 			<ul id="edition-options" class="system">
 				<li><a href="<?php bloginfo('url'); ?>?generatePDF=1&amp;edition=<?php echo $_REQUEST['edition']; ?>" target="_blank">print</a> /</li>
-				<li><a href="#change">change</a></li>
+				<li><a href="#change">change edition</a></li>
 				<?php 
 				
 				if($edition->slug !== "first-edition") {

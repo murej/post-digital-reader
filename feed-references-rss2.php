@@ -66,7 +66,7 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
 	 */
 	do_action( 'rss2_head');
 
-	$posts = query_posts("post_status=publish&post_type=post&orderby=date&nopaging=true");
+	$posts = query_posts("post_status=publish&post_type=post&orderby=date&posts_per_page=50");
 
 	foreach($posts as $post) {
 
@@ -78,29 +78,31 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
 
 			foreach( $references as $i => $ref ) {
 	
-				$ref = get_post_meta($post->ID, $i, true);
-				$counter++;
-				
-				?>
-				<item>
-					<title><?php echo "Paragraph #".get_the_title()." [".$counter."]"; ?></title>
-					<link><?php echo htmlentities( $ref["link"] ); ?></link>
-					<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_post_time('Y-m-d H:i:s', true), false); ?></pubDate>
-					<dc:creator><![CDATA[<?php echo the_author_meta( 'display_name' , $post->post_author ); ?>]]></dc:creator>
-					<guid isPermaLink="true"><?php echo htmlentities( $ref["link"] ); ?></guid>
-					<description><![CDATA[<?php //the_excerpt_rss(); ?>]]></description>
-					<content:encoded><![CDATA[<?php echo urldecode( "%E2%80%9C". $ref["quote"] ."%E2%80%9D" ); ?>]]></content:encoded>
-					<?php rss_enclosure(); ?>
-				<?php
-				/**
-				 * Fires at the end of each RSS2 feed item.
-				 *
-				 * @since 2.0.0
-				 */
-				do_action( 'rss2_item' );
-				?>
-				</item>
-<?php		
+				if( strpos($i, "reference-") === 0 ) {
+	
+					$ref = get_post_meta($post->ID, $i, true);
+					$counter++;
+									
+					?>
+					<item>
+						<title><?php echo "¶".get_the_title()." [".$counter."]"; ?></title>
+						<link><?php echo htmlentities( $ref["link"] ); ?></link>
+						<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_post_time('Y-m-d H:i:s', true), false); ?></pubDate>
+						<dc:creator><![CDATA[<?php echo the_author_meta( 'display_name' , $post->post_author ); ?>]]></dc:creator>
+						<guid isPermaLink="true"><?php echo htmlentities( $ref["link"] ); ?></guid>
+						<description><![CDATA[<?php echo urldecode( "%E2%80%9C". $ref["quote"] ."%E2%80%9D" ); ?>]]></description>
+						<?php rss_enclosure(); ?>
+					<?php
+					/**
+					 * Fires at the end of each RSS2 feed item.
+					 *
+					 * @since 2.0.0
+					 */
+					do_action( 'rss2_item' );
+					?>
+					</item>
+<?php
+				}	
 			}
 		
 		}

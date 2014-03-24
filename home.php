@@ -10,8 +10,8 @@
         
 				<div class="pure-u-1-4"></div>
 				<div class="pure-u-5-12">
-					<h2>This is <span class="what-is" contenteditable>a digital book</span>?</h2>
-					<p class="hyphenate">It's a theoretical exploration of how digital is affecting the reader of books. The writing process formed linear text and resulted in a set of possible design principles for the future (digital) book. This online version flips the traditional form and generates structure in relation to those principles in hope of creating new meaning, alternate interpretations and subsequently new ways of thinking about the role of the future book. Consider this not as a finished frame of work, not as a set of rules nor methods of creation for the ideal book of the future. It’s a starting point for a conversation, with gaps, mistakes and provocations, ready to be dissected, interpreted, filled in and corrected by the reading audience.<p>
+					<h2>This is <span class="what-is" contenteditable>a publication</span>?</h2>
+					<p class="hyphenate">You think water moves fast? You should see ice. It moves like it has a mind. Like it knows it killed the world once and got a taste for murder. After the avalanche, it took us a week to climb out. Now, I don't know exactly when we turned on each other, but I know that seven of us survived the slide... and only five made it out. Now we took an oath, that I'm breaking now. We said we'd say it was the snow that killed the other two, but it wasn't. Nature is lethal but it doesn't hold a candle to man. Yeah, I like animals better than people sometimes... Especially dogs. Dogs are the best. Every time you come home, they act like they haven't seen you in a year. And the good thing about dogs... is they got different dogs for different people. Like pit bulls. The dog of dogs. Pit bull can be the right man's best friend... or the wrong man's worst enemy. You going to give me a dog for a pet, give me a pit bull. Give me... Raoul. Right, Omar? Give me Raoul.<p>
 					<p>&ndash; <a href="#author" class="author">Jure Martinec</a></p>
 				</div>
 				
@@ -123,9 +123,9 @@
 <?php } ?>
 
 <?php if(isset($_COOKIE['myCollection'])) { ?>
-					<form method="get" action="<?php echo get_category_link( $chapters[0]->term_id ); ?>" class="view">
+					<form method="get" action="<?php echo get_bloginfo("url") . "#ch-".$chapters[0]->term_id; ?>" class="view">
 						<input type="hidden" name="edition" value="-1">
-						<button type="submit" class="system">Edit mode</button>
+						<button type="submit" class="system" <?php if($edition === "-1") { echo "disabled"; } ?>>Edit/write</button>
 					</form>
 <?php }?>
 					<form method="get" action="<?php bloginfo('url'); ?>">
