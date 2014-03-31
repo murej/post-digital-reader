@@ -44,6 +44,11 @@ function create_referencefeed() {
 }
 add_action('do_feed_references', 'create_referencefeed', 10, 1); // Make sure to have 'do_feed_customfeed'
 
+function create_referencefeedtw() {
+	load_template( get_template_directory() . '/feed-referencestw-rss2.php'); // You'll create a your-custom-feed.php file in your theme's directory
+}
+add_action('do_feed_referencestw', 'create_referencefeedtw', 10, 1); // Make sure to have 'do_feed_customfeed'
+
 add_filter('transient_rewrite_rules','custom_feed_rewrite_rule');
 add_filter('rewrite_rules_array','custom_feed_rewrite_rule');
 
@@ -63,6 +68,46 @@ function custom_feed_rewrite_rule($rules){
 /********************************************************************/
 /*	MANAGING NEW CONTENT											*/
 /********************************************************************/
+
+add_action( 'wp_ajax_define_this', 'define_this' );
+add_action( 'wp_ajax_nopriv_define_this', 'define_this' );
+
+function define_this() {
+
+	global $wpdb; // this is how you get access to the database
+
+	// check for nonce security
+	$nonce = $_POST['nonce'];
+
+	if ( ! wp_verify_nonce( $nonce, 'ajax-nonce' ) )
+		die ( 'Busted!');
+
+	// get the posted definition
+	$definition = sanitize_text_field( $_POST["definition"] );
+	
+	// if there is one
+	if(!empty($definition)) {
+
+		// get all definitions
+		$introID = get_page_by_title("Introduction")->ID;
+		$allDefinitions = get_post_meta( $introID, "definitions", true );
+		
+		// add a new one
+		$allDefinitions[] = $definition;
+		//$allDefinitions = array_values(array_unique($allDefinitions));
+		
+		//$allDefinitions = [];
+		
+		// save it
+		$return = update_post_meta( $introID, "definitions", $allDefinitions );
+
+		// return true, false or _____
+		echo json_encode( $return );
+	}
+	
+	die(); // this is required to return a proper result
+}
+
 
 function formatParagraphHTML($data) {
 
@@ -100,6 +145,12 @@ add_action( 'wp_ajax_nopriv_insert_random_paragraph', 'insert_random_paragraph_c
 function insert_random_paragraph_callback() {
 
 	global $wpdb; // this is how you get access to the database
+
+	// check for nonce security
+	$nonce = $_POST['nonce'];
+
+	if ( ! wp_verify_nonce( $nonce, 'ajax-nonce' ) )
+		die ( 'Busted!');
 
 	$exclude = [];
 
@@ -141,6 +192,12 @@ add_action( 'wp_ajax_nopriv_delete_paragraph', 'delete_paragraph_callback' );
 function delete_paragraph_callback() {
 
 	global $wpdb; // this is how you get access to the database
+	
+	// check for nonce security
+	$nonce = $_POST['nonce'];
+
+	if ( ! wp_verify_nonce( $nonce, 'ajax-nonce' ) )
+		die ( 'Busted!');
 
 	$return = wp_delete_post( get_page_by_title($_POST['paragraphID'], OBJECT, 'post')->ID, true );
 
@@ -166,12 +223,13 @@ function contribute() {
 	ob_start();
 	require_once($_POST["rootpath"]);
 
-	$paragraph = sanitize_text_field( "<p>".$_POST["paragraph"]."</p>" ); // CHECK THIS sanitize_text_field()
-	$paragraphIDTitle = wp_count_posts('post')+1;	// paragraph IDs are gathered from post titles in order to have them humanly readable
+	$paragraph = "<p>".sanitize_text_field( $_POST["paragraph"] )."</p>";
+	$paragraphIDTitle = wp_count_posts('post')->publish + 1;	// paragraph IDs are gathered from post titles in order to have them humanly readable
+	
 	$chapter = $_POST["chapter"];
 	//$edition = $_POST["edition"];
 	$references = $_POST["references"];
-
+	
 	// delete unused (legacy) posted references
 	foreach($references as $i => $ref) {
 
@@ -189,41 +247,48 @@ function contribute() {
 
 	//Verify the form fields
 	if (! wp_verify_nonce($nonce) ) die('Security check');
-
-		// just in case to avoid duplicate titles (hope it works)
-		while( get_page_by_title($paragraphIDTitle, OBJECT, 'post') !== NULL ) {
-
-			//
-			$paragraphIDTitle++; //= wp_count_posts('post')+1;
+	
+		if( !isset($_POST["paragraph"]) ) {
+		
+			wp_redirect( bloginfo('url') . $http_referer );	
 		}
-
-		// post Properties
-		$new_post = array(
-			'post_title'	=>	$paragraphIDTitle,
-			'post_content'  =>	$paragraph,
-			'post_category' =>	array($chapter),	// Usable for custom taxonomies too
-			//'tags_input'	 => array($edition),
-			'post_status' 	=>	'publish',			  // Choose: publish, preview, future, draft, etc.
-			'post_type'		=>	'post',	//'post',page' or use a custom post type if you want to
-			'post_author'	=>	2 //Author ID
-		);
-
-		//save the new post
-		$postID = wp_insert_post($new_post);
-
-		//save reference info
-		save_references( $references, $postID );
-
-
-	if( isset($postID) ) {
-
-		// mark paragraph as collected
-		updateCollection( strval($paragraphIDTitle) );
-		wp_redirect("http://" . $_SERVER["HTTP_HOST"].$http_referer . "#paragraph-" . $paragraphIDTitle);
-	}
-	else {
-		echo "ERROR SUBMITTING!";
-	}
+		else {
+				
+			// just in case to avoid duplicate titles (hope it works)
+			while( get_page_by_title($paragraphIDTitle, OBJECT, 'post') !== NULL ) {
+	
+				//
+				$paragraphIDTitle++; //= wp_count_posts('post')+1;
+			}
+	
+			// post Properties
+			$new_post = array(
+				'post_title'	=>	$paragraphIDTitle,
+				'post_content'  =>	$paragraph,
+				'post_category' =>	array($chapter),	// Usable for custom taxonomies too
+				//'tags_input'	 => array($edition),
+				'post_status' 	=>	'publish',			  // Choose: publish, preview, future, draft, etc.
+				'post_type'		=>	'post',	//'post',page' or use a custom post type if you want to
+				'post_author'	=>	2 //Author ID
+			);
+	
+			//save the new post
+			$postID = wp_insert_post($new_post);
+	
+			//save reference info
+			save_references( $references, $postID );
+	
+	
+			if( isset($postID) ) {
+		
+				// mark paragraph as collected
+				updateCollection( strval($paragraphIDTitle) );
+				wp_redirect("http://" . $_SERVER["HTTP_HOST"].$http_referer . "#paragraph-" . $paragraphIDTitle);
+			}
+			else {
+				echo "ERROR SUBMITTING!";
+			}
+		}
 }
 
 /*
@@ -362,14 +427,16 @@ function publish() {
 	ob_start();
 	require_once($_POST["rootpath"]);
 
-	$editionTitle = $_POST["editionTitle"];
-	$data["author"] = $_POST["author"];
-	$data["email"] = $_POST["email"];
-	$data["sort"] = $_COOKIE["myCollection"];
-	$data["timestamp"] = time(); // TODO: zakaj to posebi, če je tkoaltko shranjen?
+	$editionTitle = sanitize_text_field( $_POST["editionTitle"] );
+	$data["author"] = sanitize_user( $_POST["author"] );
+	$data["email"] = sanitize_email( $_POST["email"] );
+	$data["sort"] = stripslashes( $_COOKIE["myCollection"] ); // REMOVE STRIPSLASHES (IF IT BREAKS THE CODE)
+	$data["timestamp"] = time();
 	$data["votes"] = array();
 	$path = $_POST["rootpath"];
 	$nonce = $_POST["_wpnonce"];
+	
+	$referer = $_POST["_wp_http_referer"];
 
 	$paragraphIDs = get_paragraphIDs($_COOKIE["myCollection"]);
 
@@ -378,22 +445,61 @@ function publish() {
 
 	//Verify the form fields
 	if (! wp_verify_nonce($nonce) ) die('Security check');
-
-		// for each paragraph in edition
-		foreach( $paragraphIDs as $parID ) {
-			// set that edition
-			wp_set_post_tags($parID, $editionTitle, true);
+	
+		// if edition by the same name exists OR matches reserved titles OR email is invalid
+		if( get_term_by('name', $editionTitle, 'post_tag') !== false || $editionTitle === "-1" || $editionTitle === "My collection" || ( !empty($data["email"]) && !is_email($data["email"]) ) ) {
+			
+			// return an error
+			wp_redirect( add_query_arg( array( "error" => "1" ), bloginfo('url').$referer."#collection-info") );
 		}
+		else {
+		
+			// for each paragraph in edition
+			foreach( $paragraphIDs as $parID ) {
+			
+				// set that edition
+				wp_set_post_tags($parID, $editionTitle, true);
+			}
 
-		// save edition info
-		$edition = get_term_by('name', $editionTitle, 'post_tag');
-		save_extra_post_tag_fields( $edition->term_id, $data );
+			// save edition info
+			$edition = get_term_by('slug', sanitize_title( $editionTitle ), 'post_tag');			
+			save_extra_post_tag_fields( $edition->term_id, $data );
 
-	// remove cookie
-	removeCollection();
+			// remove cookie
+			removeCollection();
 
-	wp_redirect(bloginfo('url') . "?edition=" . $edition->slug);
+			wp_redirect(bloginfo('url') . "?edition=" . $edition->slug);
+		}
+}
 
+add_action('wp_ajax_nopriv_validate_edition', 'validate_edition');
+add_action('wp_ajax_validate_edition', 'validate_edition');
+
+function validate_edition() {
+	
+	global $wpdb;
+	
+	// check for nonce security
+	$nonce = $_POST['nonce'];
+
+	if ( ! wp_verify_nonce( $nonce, 'ajax-nonce' ) )
+		die ( 'Busted!');
+	
+	$editionTitle = $_POST["editionTitle"];
+
+	// if edition by the same name exists or matches reserved titles
+	if( get_term_by('name', $editionTitle, 'post_tag') !== false || $editionTitle === "-1" || $editionTitle === "My collection" ) {
+		
+		// return true
+		echo json_encode(true);
+	}
+	else {
+		
+		// return false
+		echo json_encode(false);
+	}
+	
+	die;
 }
 
 
@@ -401,7 +507,13 @@ function publish() {
 /*	VOTING															*/
 /********************************************************************/
 
-function removeVoted() {
+function removeVotedCookies() {
+
+	if(isset($_COOKIE["myVotedIDs"])) {
+
+		unset( $_COOKIE["myVotedIDs"] );
+		setcookie("myVotedIDs", null, time()-3600, "/");
+	}
 
 	if(isset($_COOKIE["myVotingIPs"])) {
 
@@ -410,51 +522,80 @@ function removeVoted() {
 	}
 }
 
-function saveVotedIP($ip) {
+function addVote($ip, $editionID, $voteData) {
 	
-	$voted = json_decode( stripslashes($_COOKIE["myVotingIPs"]), true );
-	$voted[] = strval($ip);
+	$votedIDs = json_decode( stripslashes($_COOKIE["myVotedIDs"]), true );
+	$votedIDs[] = strval($editionID);
 	
-	$voted = array_unique($voted);
+	$votingIPs = json_decode( stripslashes($_COOKIE["myVotingIPs"]), true );
+	$votingIPs[] = strval($ip);
+	$votingIPs = array_values(array_unique($votingIPs));
 
-	removeVoted();
-	setcookie("myVotingIPs", json_encode($voted), time()+3650, "/");
+	removeVotedCookies();
+	setcookie("myVotedIDs", json_encode($votedIDs), time()+(10 * 365 * 24 * 60 * 60), "/");
+	setcookie("myVotingIPs", json_encode($votingIPs), time()+(10 * 365 * 24 * 60 * 60), "/");
+
+	$voteData[] = $ip;
+	
+	return array_values($voteData);
 }
 
-function removeVotedIP($ip) {
+function removeVote($ip, $editionID, $voteData) {
 	
-	$voted = json_decode( stripslashes($_COOKIE["myVotingIPs"]), true );
+	$votedIDs = json_decode( stripslashes($_COOKIE["myVotedIDs"]), true );
+	$votingIPs = json_decode( stripslashes($_COOKIE["myVotingIPs"]), true );
 
-	if( ($key = array_search($ip, $voted) ) !== false) {
-    	unset($voted[$key]);
+	if( ($key = array_search($editionID, $votedIDs) ) !== false) {
+    	unset($votedIDs[$key]);
+	}
+
+	if( empty($votedIDs) && in_array($ip, $votingIPs) ) {
+    	$votingIPs = [];
+	}
+
+	if( ($key = array_search($ip, $voteData) ) !== false) {
+    	unset($voteData[$key]);
 	}
 	
-	removeVoted();
-	setcookie("myVotingIPs", json_encode($voted), time()+3650, "/");
+	removeVotedCookies();
+	setcookie("myVotedIDs", json_encode(array_values($votedIDs)), time()+(10 * 365 * 24 * 60 * 60), "/");
+	setcookie("myVotingIPs", json_encode(array_values($votingIPs)), time()+(10 * 365 * 24 * 60 * 60), "/");
+	
+	return array_values($voteData);
 }
 
-function check_if_voted($currentVoter, $votes) {
+function check_if_voted($currentVoterIP, $editionID, $voteData) {
 	
 	$voterCheck = array();
 	
-	$voter = json_decode( stripslashes( $_COOKIE["myVotingIPs"] ));
-	$voter[] = $currentVoter;
-	$voter = array_unique($voter);
+	// get voted IDs
+	$myVotedIDs = json_decode( stripslashes( $_COOKIE["myVotedIDs"] ) );
+	$editionID = strval($editionID);
+	
+	// get voting IPs
+	$votingIPs = json_decode( stripslashes( $_COOKIE["myVotingIPs"] ) );
+	$votingIPs[] = $currentVoterIP;
+	$votingIPs = array_values(array_unique($votingIPs));
 	
 	// go through all voter's IPs
-	foreach($voter as $ip) {
+	foreach($votingIPs as $ip) {
 		
 		// if it matches one that already voted
-		if( in_array( $ip, $votes ) ) {
+		if( in_array( $ip, $voteData ) ) {
 			
 			// store it
 			$voterCheck[] = $ip;
 		}
 	}
-	
-	if( !empty($voterCheck) ) {
+
+	// if voting IPs and voted IDs are matching
+	if( !empty($voterCheck) && in_array( $editionID, $myVotedIDs ) ) {
+
+		// return voting IPs (as voted)
 		return $voterCheck;
 	} else {
+	
+		// return as not voted
 		return false;
 	}
 }
@@ -471,56 +612,36 @@ function vote_edition() {
 		die ( 'Busted!');
 	
 	// get edition
-	$tag_id = $_POST['tag_id'];
+	$editionID = $_POST['tag_id'];
 
 	// get edition data
-	$editionData = get_edition_data($tag_id);
+	$editionData = get_edition_data($editionID);
 
 	// get current IP
-	$currentVoter = get_client_ip();
+	$currentVoterIP = get_client_ip();
 
-	// get all voter's IPs
-	$voterCheck = check_if_voted($currentVoter, $editionData["votes"]);
+	// check if already voted
+	$voterCheck = check_if_voted($currentVoterIP, $editionID, $editionData["votes"]);
 	
 	// if not yet voted
 	if( empty($voterCheck) ) {
 	
 		// add new vote
-		$editionData["votes"][] = $currentVoter;
-	
-		// save new IP to cookie
-		saveVotedIP($currentVoter);
-
+		$editionData["votes"] = addVote($currentVoterIP, $editionID, $editionData["votes"]);
 	}
 	// if already voted
 	else {
-		
-		// go through all matched voter's IPs
-		foreach($voterCheck as $ip) {
-			
-			// find it in votes
-			$pos = array_search($ip, $editionData["votes"]);
-			
-			// if found
-			if($pos !== false) {
-				
-				// remove from votes
-				unset($editionData["votes"][$pos]);
-				
-				// remove from cookie
-				removeVotedIP($ip);
-			}
-		}
-		
-		// reindex array
-		$editionData["votes"] = array_values($editionData["votes"]);
+	
+		// remove vote
+		$editionData["votes"] = removeVote($currentVoterIP, $editionID, $editionData["votes"]);
 	}
+	
+	//$editionData["votes"] = [];
+	// save new data	
+	save_extra_post_tag_fields( $editionID, $editionData );
 
 	// get votes count for current edition
 	$count = count( $editionData["votes"] );
-	
-	// save new data	
-	save_extra_post_tag_fields( $tag_id, $editionData );
 	
 	// display count (ie jQuery return value)
 	echo $count;
@@ -587,7 +708,7 @@ function get_client_ip() {
 
 function get_all_editions_sorted() {
 	
-	$allEditions = get_tags('exclude='.get_term_by('slug','first-edition','post_tag')->term_id);
+	$allEditions = get_tags('exclude='.get_term_by('slug','original','post_tag')->term_id);
 	
 	// resort editions according to votes
 	foreach($allEditions as $oneEdition) {
@@ -648,8 +769,11 @@ function get_paragraph_permalink( $titleID, $categoryID, $edition ) {
 
 	$link = get_category_link( $categoryID );
 
-	if($edition && $edition != "-1") {
+	if($edition && $edition !== "-1") {
 		$link = add_query_arg( array( "edition" => $edition->slug ), $link );
+	}
+	else {
+		$link = add_query_arg( array( "clear-edition" => 1 ), $link );
 	}
 
 	$link .= "#paragraph-" . $titleID;
@@ -721,6 +845,45 @@ function find_first_available_chapter($currentChapterID) {
 	}
 	
 	return false;
+}
+
+function get_volume($single, $edition) {
+	
+	// $single = $chapter in $edition
+
+	return count($single)/count($edition);
+}
+
+function get_activity($chapterID) {
+
+	//$chapter / sum(count in each tag)
+	
+	$chapter = count( get_posts("nopaging=true&category__in=".$chapterID) );
+	$book = 0;
+
+	$editions = get_tags();
+	
+	foreach($editions as $edition) {
+		
+		$book = $book + $edition->count;
+	}
+
+	return $chapter/$book;
+	//return $book;
+}
+
+function generateRandomString($length = 10) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, strlen($characters) - 1)];
+    }
+    return $randomString;
+}
+
+function map($x, $in_min, $in_max, $out_min, $out_max) {
+
+	return ($x - $in_min) * ($out_max - $out_min) / ($in_max - $in_min) + $out_min;
 }
 
 
@@ -907,13 +1070,22 @@ function importJSON() {
 	$chapters = array(
 
 		1 => "Reactive environments",
-		2 => "Language in/as any form",
+		2 => "Language in/as any&nbsp;form",
 		3 => "Recontextualisation",
 		4 => "Focus",
 		5 => "Ambiguity",
-		6 => "Uniqueness and hybridity of media"
+		6 => "Uniqueness and hybridity&nbsp;of&nbsp;media"
 
 	);
+	
+	// add all chapters (categories)
+	foreach($chapters as $name) {
+		
+		if( get_cat_ID($name) === 0 ) {
+			
+			wp_insert_term($name, "category", array('description' => ""));
+		}
+	}
 
 	removeMyPosts();
 
@@ -945,7 +1117,7 @@ function importJSON() {
 			//'post_date_gmt'  => [ Y-m-d H:i:s ] // The time post was made, in GMT.
 			'comment_status' => 'closed', // Default is the option 'default_comment_status', or 'closed'.
 			'post_category'	=> array( get_cat_ID( $chapters[$par->chapter] ) ), // Default empty.
-			'tags_input'		=> 'First edition' //, Default empty.
+			'tags_input'		=> 'Original' //, Default empty.
 			//'tax_input'	  => [ array( <taxonomy> => <array | string> ) ] // For custom taxonomies. Default empty.
 			//'page_template'  => [ <string> ] // Default empty.
 		);
@@ -987,11 +1159,17 @@ function importJSON() {
 
 		// clear reference array
 		$references = [];
+		
+/*
+		// make 1s gaps between imports to have different timestamp
+		echo "Imported ".$postCount.". Sleeping 1s...\n";
+		sleep(1);
 
+*/
 	}
 
 	// save edition info
-	$edition = get_term_by('name', 'First edition', 'post_tag');
+	$edition = get_term_by('name', 'Original', 'post_tag');
 	$editionData = array(
 		"author" => "Jure Martinec",
 		"email" => "jure.martinec@gmail.com",
@@ -1000,7 +1178,7 @@ function importJSON() {
 		"votes" => array()
 
 	);
-	save_extra_post_tag_fields($edition->term_id, $editionData); 	// NE DELA!
+	save_extra_post_tag_fields($edition->term_id, $editionData);
 
 	echo "IMPORTED " . $postCount . " POSTS.";
 	exit;

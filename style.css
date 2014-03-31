@@ -84,7 +84,7 @@ body.cover ul#nav {
   position: relative !important;
   height: 100% !important;
   top: -4.5em;
-  background: repeating-linear-gradient(rgba(255, 255, 255, 0.95) 0em, rgba(255, 255, 255, 0.95) 4.5em, rgba(255, 255, 255, 0.25) 66%, transparent) !important; }
+  background: repeating-linear-gradient(white 0em, rgba(255, 255, 255, 0.98) 4.5em, rgba(255, 255, 255, 0.25) 66%, transparent) !important; }
 body.cover ul#nav.mycollection {
   background: repeating-linear-gradient(rgba(255, 255, 0, 0.95) 0em, rgba(255, 255, 0, 0.95) 4.5em, rgba(255, 255, 255, 0.95) 4.5em, rgba(255, 255, 255, 0.25) 66%, transparent) !important; }
 body.cover ul#wrapper {
@@ -95,7 +95,7 @@ body.cover ul#nav li#collector {
   transition: top 0.25s ease-out; }
 
 body.home li.chapter {
-  padding: 0 0 18em 0; }
+  padding: 0 0 24em 0 !important; }
 
 div#cover {
   position: relative;
@@ -210,7 +210,7 @@ ul#nav {
     ul#nav li#collector:hover button, ul#nav li#collector.hover button {
       padding-top: 0.15em;
       background-color: rgba(50, 50, 50, 0.95); }
-    ul#nav li#collector:hover span, ul#nav li#collector.hover span {
+    ul#nav li#collector:hover span.ribbon, ul#nav li#collector.hover span.ribbon {
       border-left-color: rgba(50, 50, 50, 0.95);
       border-right-color: rgba(50, 50, 50, 0.95); }
 
@@ -220,7 +220,8 @@ ul#nav.mycollection {
 #collector {
   height: 4.5em; }
   #collector form {
-    padding: 0 1em 0 1em; }
+    padding: 0 1em 0 1em;
+    min-width: 5em; }
     #collector form button {
       line-height: 2;
       height: 100%;
@@ -233,7 +234,7 @@ ul#nav.mycollection {
       text-align: center;
       transition: padding 0.1s;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); }
-    #collector form span {
+    #collector form span.ribbon {
       display: block;
       height: 0;
       width: 0;
@@ -335,6 +336,8 @@ div#edition-selector {
     border-bottom: 0.125em solid #323232; }
     div#edition-selector div#first-edition h2 {
       margin-top: 1em; }
+  div#edition-selector h2 {
+    padding-right: 3em; }
   div#edition-selector h3 {
     padding: 1.5em 0 1.5em 0;
     margin: 0;
@@ -411,15 +414,47 @@ ul#wrapper {
   position: relative;
   top: -4.5em;
   min-height: 100%; }
+  ul#wrapper p a {
+    text-decoration: none;
+    margin: 0 0.1em 0 0.1em;
+    font-size: 1em;
+    /* 						opacity: 0.25; */
+    border-bottom: 1px dotted rgba(50, 50, 50, 0.25);
+    /* 						padding: 0.2em 0; */ }
+  ul#wrapper p a:hover {
+    /* 						font-weight: bold; */
+    /* 						opacity: 1; */
+    border-bottom-style: solid;
+    /* 						border-bottom-color: $primary-color; */ }
+  ul#wrapper p a:visited {
+    color: #727272 !important; }
   ul#wrapper li.introduction {
-    margin-bottom: 42em; }
+    margin-bottom: 36em; }
     ul#wrapper li.introduction h2 {
       margin-bottom: 2em; }
       ul#wrapper li.introduction h2 span.what-is {
         display: inline-block;
-        min-width: 15em;
+        min-width: 9em;
         outline: none;
-        border-bottom: 2px solid black; }
+        border-bottom: 0.08333em solid black;
+        /*
+        				font-family: $secondary-font-stack;
+        				font-style: italic;
+        */
+        padding-right: 1em; }
+      ul#wrapper li.introduction h2 span.light {
+        opacity: 0; }
+    ul#wrapper li.introduction h2.success span.what-is {
+      min-width: inherit;
+      /* 				color: green; */
+      transition: color 0s;
+      border-bottom-color: white;
+      padding-right: 0; }
+    ul#wrapper li.introduction h2.success span.light {
+      opacity: 1; }
+    ul#wrapper li.introduction h2.error span.what-is {
+      color: red;
+      transition: color 0s; }
     ul#wrapper li.introduction div:last-child {
       margin-top: 45%; }
   ul#wrapper li#loc div {
@@ -440,30 +475,24 @@ ul#wrapper {
     ul#wrapper li.chapter div.img {
       width: 100%; }
     ul#wrapper li.chapter div.title {
-      margin: -4.5em 0 0 0; }
+      /* 			margin: -4.5em 0 0 0; */ }
     ul#wrapper li.chapter div.separator {
       margin: 2.25em 0 12em 0; }
     ul#wrapper li.chapter h1 {
-      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+      /* 			text-shadow: 1px 1px 1px rgba(0,0,0,0.25); */
       margin-left: -0.065em; }
       ul#wrapper li.chapter h1 span.counter {
         font-size: 0.25em;
         font-family: "Courier New", monospace;
         text-shadow: none; }
-    ul#wrapper li.chapter a:hover h1 {
+    ul#wrapper li.chapter a:hover h1 span.headline {
       text-decoration: underline; }
-  ul#wrapper li.chapter.empty h1 {
+  ul#wrapper li.chapter.empty h1 span.headline {
     text-decoration: line-through; }
   ul#wrapper li.chapter.empty img {
     opacity: 0.25;
     z-index: -1;
-    position: relative;
-    filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='grayscale'><feColorMatrix type='matrix' values='0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0'/></filter></svg>#grayscale");
-    /* Firefox 10+, Firefox on Android */
-    filter: gray;
-    /* IE6-9 */
-    -webkit-filter: grayscale(100%);
-    /* Chrome 19+, Safari 6+, Safari 6+ iOS */ }
+    position: relative; }
   ul#wrapper li#content ul.wrapper {
     padding-bottom: 11em;
     /* 			border-bottom: 2px solid black; */ }
@@ -479,20 +508,6 @@ ul#wrapper {
         box-sizing: border-box;
         padding: 0 1.5em 0 0;
         background-color: white; }
-        ul#wrapper li#content ul.wrapper li.paragraph p a.ref-link {
-          text-decoration: none;
-          margin: 0 0.1em 0 0.1em;
-          font-size: 1em;
-          /* 						opacity: 0.25; */
-          border-bottom: 1px dotted rgba(50, 50, 50, 0.25);
-          /* 						padding: 0.2em 0; */ }
-        ul#wrapper li#content ul.wrapper li.paragraph p a.ref-link:hover {
-          /* 						font-weight: bold; */
-          /* 						opacity: 1; */
-          border-bottom-style: solid;
-          /* 						border-bottom-color: $primary-color; */ }
-        ul#wrapper li#content ul.wrapper li.paragraph p a.ref-link:visited {
-          color: #727272 !important; }
       ul#wrapper li#content ul.wrapper li.paragraph div.paragraph-num {
         text-align: center;
         box-sizing: border-box;
@@ -550,7 +565,7 @@ ul#wrapper {
             margin: 0;
             appearance: none;
             font-family: "Courier New", monospace;
-            border: 0.084em solid rgba(50, 50, 50, 0.25);
+            border: 1px solid rgba(50, 50, 50, 0.25);
             outline: none; }
       ul#wrapper li#content ul.wrapper li.paragraph ul.more.active {
         display: inline-block !important; }
@@ -573,6 +588,7 @@ ul#wrapper {
         transition: background 0s;
         background-color: #ffff80; }
   ul#wrapper li.add-content ul#adding-options {
+    margin-top: -8em;
     margin-bottom: 13.71em; }
   ul#wrapper li.add-content div#writer {
     display: none;
@@ -682,12 +698,17 @@ ul#wrapper {
       height: 2.25em;
       /* 			margin-bottom: 1.5/2 * 1em; */
       border: none; }
+    ul#wrapper li#collection-info input.match-error.title {
+      color: red;
+      text-decoration: line-through; }
+    ul#wrapper li#collection-info input.error {
+      border-bottom-color: red; }
     ul#wrapper li#collection-info form.view button {
       margin-top: 8.57143em; }
   ul#wrapper li.next-chapter {
     position: relative;
     height: 24em;
-    margin-top: 11em;
+    /* 		margin-top: 11em; */
     /* 		border-top: 2px solid $primary-color; */
     overflow: hidden; }
     ul#wrapper li.next-chapter div.dimmer {
@@ -711,16 +732,31 @@ ul#wrapper {
     text-decoration: underline !important; }
 
 ul#footer {
+  position: relative;
   width: 100%;
   background-color: #323232;
   color: rgba(255, 255, 255, 0.95);
   padding: 4.5em 0; }
+  ul#footer h3 {
+    font-weight: normal; }
   ul#footer a {
-    color: rgba(255, 255, 255, 0.95); }
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.95); }
+  ul#footer a:hover {
+    border-bottom-style: solid; }
+  ul#footer li.right {
+    position: absolute;
+    top: 4.5em;
+    bottom: 4.5em; }
+    ul#footer li.right div.social-media {
+      position: absolute;
+      bottom: 3em; }
+      ul#footer li.right div.social-media .facebook {
+        margin: 0 0 1em 0; }
   ul#footer .twitter-follow-button {
     margin: 0.5em 0 3em 0; }
-  ul#footer .facebook {
-    margin: 0.6em 0 1.6em 0; }
 
 .system {
   font-family: "Courier New", monospace;
@@ -796,6 +832,9 @@ input {
   border-bottom: 0.125em solid #323232;
   outline: none; }
 
+label {
+  display: none !important; }
+
 textarea {
   width: 100%;
   min-height: 1em;
@@ -841,7 +880,10 @@ audio {
   body {
     width: 768px; } }
 /* TABLET PORTRAIT */
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 1023px) {
   body {
     font-size: 0.75em; } }
 /* LARGE DESKTOP */
+@media only screen and (min-width: 1024px) and (max-width: 1199px) {
+  body {
+    font-size: 0.875em; } }

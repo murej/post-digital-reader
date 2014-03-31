@@ -73,20 +73,15 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 					<li id="paragraph-<?php the_title(); ?>" class="pure-g paragraph">
 
 <?php if($editionsAsTags !== false) { ?>
-		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select" title="Toggle selection">&para;<?php the_title(); ?></a></div>
+		        		<div class="pure-u-1-12 paragraph-num system"><a href="#select" title="Collect/Remove">&para;<?php the_title(); ?></a></div>
 <?php } else { ?>
-		        		<div class="pure-u-1-12 paragraph-num system"><a href="#delete"><span style="font-size: 1.5em; padding: 0 0.25em;">&times;</span></a></div>
+		        		<div class="pure-u-1-12 paragraph-num system"><a href="#delete" title="Delete paragraph"><span style="font-size: 1.5em; padding: 0 0.25em;">&times;</span></a></div>
 <?php } ?>
 		        		<div class="pure-u-1-6"></div>
 
 		        		<p class="pure-u-5-12 hyphenate"><?php
 		        		
 		        			echo do_shortcode( str_replace("<p>", "", str_replace("</p>", "", get_the_content('')) ) );
-/*
-		        			var_dump( get_post_meta($post->ID, 'reference-1', true) );
-		        			var_dump( get_post_meta($post->ID, 'reference-2', true) );
-		        			var_dump( get_post_meta($post->ID, 'reference-3', true) );
-*/
 		        			
 		        		?></p>
 
@@ -117,7 +112,7 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 		        		<ul class="pure-u-1-12 more system">
 			        		<?php if($edition->name === "-1") { ?><li class="move"><span>&equiv; </span><a href="">MOVE</a></li><?php } ?>
 			        		<?php if($editionsAsTags !== false) { ?><li class="share"><span>&infin; </span><a href="">SHARE</a></li><?php } ?>
-			        		<li class="link"><form><input type="text" value="<?php echo get_paragraph_permalink( get_the_title(), get_the_category()[0]->term_id, $edition ); ?>"></form></li>
+			        		<li class="link"><form><input type="text" value="<?php echo add_query_arg( array("source" => "share"), get_paragraph_permalink( get_the_title(), get_the_category()[0]->term_id, $edition ) ); ?>"></form></li>
 		        		</ul>
 
 		        	</li>
@@ -128,12 +123,21 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 
 				<li class="pure-g paragraph">
 					<div class="pure-u-1-4"></div>
-					<p class="pure-u-5-12 hyphenate"><?php _e("Sorry, there are no paragraphs in this chapter in your current edition."); ?></p>
+					<p class="pure-u-5-12 hyphenate"><?php
+					
+						if($edition->name === "-1") {
+							_e("You haven't collected any paragraphs in this chapter yet.");
+						}
+						else {
+							_e("Sorry, there are no paragraphs in this chapter in your current edition.");
+						}
+
+					?></p>
 				</li>
 
 				<li class="pure-g paragraph">
 					<div class="pure-u-1-4"></div>
-					<p class="pure-u-5-12 hyphenate system"><a href="#writer" class="write">Start writing</a> or <a href="#random" class="random">insert a random one</a></p>
+					<p class="pure-u-5-12 system"><a href="#writer" class="write">Start writing</a> or <a href="#random" class="random">insert a random one</a></p>
 				</li>
 
 <?php endif; ?>
@@ -143,18 +147,20 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
         	</li>
 <?php if( $edition->name === "-1" ) { ?>
         	<li id="add-content" class="pure-g add-content">
+        	
+<?php			if ( $the_query->have_posts() ) { ?>
 
-<!--
         		<ul id="adding-options">
 
 	        		<li class="pure-u-1-4"></li>
 
 	        		<li class="pure-u-5-12 system">
-		        		<a href="#writer" class="write">Write new</a> | <a href="#random" class="random">Add random</a>
+		        		<a href="#writer" class="write">Write new</a> or <a href="#random" class="random">insert a random one</a>
 	        		</li>
 
         		</ul>
--->
+        		
+<?php 			} ?>
 
 		        <div id="writer" class="pure-g">
 
@@ -165,7 +171,11 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 						<input type="hidden" value="1" name="contribute">
 
 						<input type="hidden" value="<?php echo str_replace('/wp-content/themes', '', get_theme_root()); ?>/wp-blog-header.php" name="rootpath">
-						<?php wp_nonce_field(); ?>
+						<?php
+						
+							wp_nonce_field();
+							wp_referer_field();
+						?>
 
 						<input type="hidden" value="<?php echo $currentChapterID; ?>" name="chapter">
 	        			<div class="textarea" contenteditable></div>
@@ -223,7 +233,12 @@ if ( $the_query->have_posts() ) : while ( $the_query->have_posts() ) : $the_quer
 
         	<li id="ch-<?php echo $chapters[$nextChapterKey]->cat_ID; ?>" class="pure-g chapter next-chapter">
         		
-				<a href="<?php echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$nextChapterKey]->cat_ID)); ?>">
+				<a href="<?php
+				
+					if($_REQUEST["clear-edition"]) { echo add_query_arg( array("clear-edition" => 1), get_category_link($chapters[$nextChapterKey]->cat_ID)); }
+					else { echo add_query_arg( array("edition" => $_GET["edition"]), get_category_link($chapters[$nextChapterKey]->cat_ID)); }
+				
+				?>">
 					
 					<div class="dimmer"></div>
 					

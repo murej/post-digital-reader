@@ -66,7 +66,7 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
 	 */
 	do_action( 'rss2_head');
 
-	$posts = query_posts("post_status=publish&post_type=post&orderby=date&order=desc&posts_per_page=40");//&posts_per_page=50");
+	$posts = query_posts("post_status=publish&post_type=post&orderby=date&order=asc&nopaging=true");//&posts_per_page=50");
 
 	foreach($posts as $post) {
 
@@ -105,11 +105,10 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
 					$counter++;
 
 					$link = html_entity_decode( remove_query_arg( array("reference"), $link ) );
-					$link = htmlentities( add_query_arg( array( "reference" => $counter, "source" => "feed" ), $link ) );
+					$link = htmlentities( add_query_arg( array( "reference" => $counter, "source" => "twitterfeed", "medium" => "twitter" ), $link ) );
 					
 					//$guid = htmlentities( add_query_arg( array("uniquifier" => generateRandomString(30) ), $ref["link"] ) );
 					$guid = htmlentities( add_query_arg( array("referrer" => $title."_".$counter ), $ref["link"] ) );	// TA MORE BIT NEGENERIRAN UNIQUE
-					
 
 					if( !empty($ref["quote"]) ) {
 						$quote = urldecode( "%C2%BB". $ref["quote"] ."%C2%AB" );
@@ -135,7 +134,9 @@ echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
 					</item>
 <?php
 				}
+				//break;
 			}
+			//break;
 		}
 	}
 ?>
